@@ -307,15 +307,15 @@ void motor_task()
     double drive_fr_pct = drive_fr_slew.new_value((forward - strafe - turn) * sync);
     double drive_bl_pct = drive_bl_slew.new_value((forward - strafe + turn) * sync);
     double drive_br_pct = drive_br_slew.new_value((forward + strafe - turn) * sync);
-    model->left(forward + turn);
-    model->right(forward - turn);
+    // model->left(forward + turn);
+    // model->right(forward - turn);
 
     // drive_fl->moveVelocity(drive_fl_pct * 2);
     // drive_fr->moveVelocity(drive_fr_pct * 2);
     // drive_bl->moveVelocity(drive_bl_pct * 2);
     // drive_br->moveVelocity(drive_br_pct * 2);
 
-    // model->arcade(master.get_analog(ANALOG_RIGHT_Y), master.get_analog(ANALOG_RIGHT_X));
+    model->arcade(master.get_analog(ANALOG_RIGHT_Y), master.get_analog(ANALOG_RIGHT_X));
 
     pros::delay(5);
   }
