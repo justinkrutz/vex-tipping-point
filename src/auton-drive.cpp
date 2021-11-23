@@ -277,10 +277,12 @@ void score_balls(int balls_to_score) {
 
 void motor_task()
 {
-  std::shared_ptr<AbstractMotor> drive_fl = x_model->getTopLeftMotor();
-  std::shared_ptr<AbstractMotor> drive_fr = x_model->getTopRightMotor();
-  std::shared_ptr<AbstractMotor> drive_bl = x_model->getBottomLeftMotor();
-  std::shared_ptr<AbstractMotor> drive_br = x_model->getBottomRightMotor();
+ std::shared_ptr<ChassisModel> model = chassis->getModel();
+  // std::shared_ptr<AbstractMotor> drive_left = chassis->getTopLeftMotor();
+  // std::shared_ptr<AbstractMotor> drive_left = chassis->getTopLeftMotor();
+  // std::shared_ptr<AbstractMotor> drive_fr = x_model->getTopRightMotor();
+  // std::shared_ptr<AbstractMotor> drive_bl = x_model->getBottomLeftMotor();
+  // std::shared_ptr<AbstractMotor> drive_br = x_model->getBottomRightMotor();
 
   // int time_last = 0;
   Slew drive_fl_slew(DRIVER_SLEW);
@@ -305,11 +307,15 @@ void motor_task()
     double drive_fr_pct = drive_fr_slew.new_value((forward - strafe - turn) * sync);
     double drive_bl_pct = drive_bl_slew.new_value((forward - strafe + turn) * sync);
     double drive_br_pct = drive_br_slew.new_value((forward + strafe - turn) * sync);
+    model->left(forward + turn);
+    model->right(forward - turn);
 
-    drive_fl->moveVelocity(drive_fl_pct * 2);
-    drive_fr->moveVelocity(drive_fr_pct * 2);
-    drive_bl->moveVelocity(drive_bl_pct * 2);
-    drive_br->moveVelocity(drive_br_pct * 2);
+    // drive_fl->moveVelocity(drive_fl_pct * 2);
+    // drive_fr->moveVelocity(drive_fr_pct * 2);
+    // drive_bl->moveVelocity(drive_bl_pct * 2);
+    // drive_br->moveVelocity(drive_br_pct * 2);
+
+    // model->arcade(master.get_analog(ANALOG_RIGHT_Y), master.get_analog(ANALOG_RIGHT_X));
 
     pros::delay(5);
   }

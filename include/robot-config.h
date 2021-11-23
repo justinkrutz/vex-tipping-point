@@ -4,7 +4,7 @@
 #include "main.h"
 
 extern std::shared_ptr<OdomChassisController> chassis;
-extern std::shared_ptr<ThreeEncoderXDriveModel> x_model;
+// extern std::shared_ptr<ThreeEncoderXDriveModel> x_model;
 
 extern pros::Controller master;
 extern pros::Controller partner;

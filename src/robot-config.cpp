@@ -2,7 +2,7 @@
 
 
 std::shared_ptr<OdomChassisController> chassis;
-std::shared_ptr<ThreeEncoderXDriveModel> x_model;
+// std::shared_ptr<ThreeEncoderXDriveModel> x_model;
 
 pros::Controller master (pros::E_CONTROLLER_MASTER);
 pros::Controller partner (pros::E_CONTROLLER_PARTNER);
@@ -39,11 +39,15 @@ void build_chassis() {
   tracker_back.reset_position();
 
   chassis = ChassisControllerBuilder()
+    // .withMotors(
+    //     9,  // Top left
+    //     -10, // Top right (reversed)
+    //     -2, // Bottom right (reversed)
+    //     1   // Bottom left
+    // )
     .withMotors(
-        9,  // Top left
-        -10, // Top right (reversed)
-        -2, // Bottom right (reversed)
-        1   // Bottom left
+      {5, -6, 7},
+      {8, 9, -10}
     )
     .withDimensions(AbstractMotor::gearset::green, {{3.25_in, 11.381_in}, imev5GreenTPR})
     .withSensors(
@@ -55,5 +59,5 @@ void build_chassis() {
     .buildOdometry();
 
   chassis->getModel()->setBrakeMode(okapi::AbstractMotor::brakeMode::brake);
-  x_model = std::dynamic_pointer_cast<ThreeEncoderXDriveModel>(chassis->getModel());
+  // x_model = std::dynamic_pointer_cast<ThreeEncoderXDriveModel>(chassis->getModel());
 }
