@@ -35,8 +35,8 @@ void initialize() {
   build_chassis();
   odom_init();
   // chassis->setState({13.491_in, 34.9911_in, 0_deg});
-  chassis->setState({15.7416_in, 31.4911_in, -90_deg});
-  imu_odom->setState({15.7416_in, 31.4911_in, -90_deg});
+  // chassis->setState({15.7416_in, 31.4911_in, -90_deg});
+  // imu_odom->setState({15.7416_in, 31.4911_in, -90_deg});
   optical_sensor.set_led_pwm(100);
   pros::Task(autondrive::motor_task);
   // robotfunctions::set_callbacks();
@@ -47,7 +47,7 @@ void initialize() {
   controllermenu::init();
   pros::Task roller_task (robotfunctions::rollers::main_task);
   controllerbuttons::button_handler.master.r2.pressed.set(set_drive_callbacks);
-  odomutilities::errorcorrection::start();
+  // odomutilities::errorcorrection::start();
 }
 
 /**
@@ -57,7 +57,7 @@ void initialize() {
  */
 void disabled() {
   autondrive::auton_group.terminate();
-  odomutilities::errorcorrection::auto_goal_center = true;
+  // odomutilities::errorcorrection::auto_goal_center = true;
 }
 
 /**

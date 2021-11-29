@@ -39,25 +39,15 @@ void build_chassis() {
   tracker_back.reset_position();
 
   chassis = ChassisControllerBuilder()
-    // .withMotors(
-    //     9,  // Top left
-    //     -10, // Top right (reversed)
-    //     -2, // Bottom right (reversed)
-    //     1   // Bottom left
-    // )
     .withMotors(
       {5, -6, 7},
-      {8, 9, -10}
+      {8, 9, -10} // TODO: figure out why 8 needs to not be reversed
     )
-    .withDimensions(AbstractMotor::gearset::green, {{3.25_in, 11.381_in}, imev5GreenTPR})
-    .withSensors(
-        RotationSensor{5, true}, // left encoder
-        RotationSensor{7},  // right encoder
-        RotationSensor{6}  // middle encoder
-    )
-    .withOdometry({{2.75_in, 12.0873_in, 6.04365_in, 2.75_in}, quadEncoderTPR}, StateMode::FRAME_TRANSFORMATION)
+    // wheel size is 4.1797_in times 3/7 gear ratio
+    .withDimensions(AbstractMotor::gearset::blue, {{1.7913_in, 10.6016_in}, imev5GreenTPR})
+    .withOdometry()
     .buildOdometry();
 
   chassis->getModel()->setBrakeMode(okapi::AbstractMotor::brakeMode::brake);
-  // x_model = std::dynamic_pointer_cast<ThreeEncoderXDriveModel>(chassis->getModel());
+  // x_model = std::dynamic_pointer_cast<ThreeEncoderXDriveModel>(chassis->getModel()); // From last season
 }
