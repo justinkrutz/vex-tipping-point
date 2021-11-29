@@ -195,7 +195,7 @@ void wait_until_final_target_reached() {
 }
 
 Macro ball_allign(
-    [&](){
+    [](){
       // int time = pros::millis();
 
       // while (abs(get_odom_state().theta - goal_center_angle) > 1_deg && pros::millis() - time < 2000) {
@@ -222,7 +222,7 @@ Macro ball_allign(
 QAngle goal_center_angle;
 
 Macro goal_center(
-    [&](){
+    [](){
       int time = pros::millis();
 
       while (abs(get_odom_state().theta - goal_center_angle) > 1_deg && pros::millis() - time < 2000) {
@@ -326,7 +326,7 @@ void motor_task()
 using namespace controllerbuttons;
 
 Macro goal_turn_right(
-    [&](){
+    [](){
       button_strafe = 100;
       button_turn = -70;
       while (true) {
@@ -342,7 +342,7 @@ Macro goal_turn_right(
     {&drive_group});
 
 Macro goal_turn_left(
-    [&](){
+    [](){
       button_strafe = -100;
       button_turn = 80;
       while (true) {
@@ -446,11 +446,11 @@ void auton_clean_up() {
   controllermenu::master_print_array[2] = "";
 }
 
-Macro none([&](){},[](){});
+Macro none([](){},[](){});
 
 
 Macro test(
-    [&](){
+    [](){
       auton_init({13.491_in, 34.9911_in, 0_deg});
 
       move_settings.start_output = 100;
@@ -472,7 +472,7 @@ Macro test(
 
 // Our main autonomous routine
 Macro home_row_three(
-    [&](){
+    [](){
       using namespace matchballs;
       auton_init({15.7416_in, 31.4911_in, -90_deg}, "home_row_three");
       stow_after_eject = true;
@@ -534,7 +534,7 @@ Macro home_row_three(
     {&auton_group});
 
 Macro home_row_three_old(
-    [&](){
+    [](){
       auton_init({15.7416_in, 31.4911_in, -90_deg}, "home_row_three_old");
 
       move_settings.start_output = 100;
@@ -622,7 +622,7 @@ Macro home_row_three_old(
     {&auton_group});
 
 Macro home_row_two(
-    [&](){
+    [](){
       imu_odom->setState({15.7416_in, 31.4911_in, -90_deg});
 
       move_settings.start_output = 100;
@@ -673,7 +673,7 @@ Macro home_row_two(
     {&auton_group});
 
 Macro left_shawnton(
-    [&](){
+    [](){
       imu_odom->setState({15.7416_in, 31.4911_in, -90_deg});
 
       add_target(26.319_in, 26.319_in, -90_deg);
@@ -701,7 +701,7 @@ Macro left_shawnton(
     {&auton_group});
 
 Macro right_shawnton(
-    [&](){
+    [](){
       imu_odom->setState({31.4911_in, 15.7416_in, -180_deg});
 
       add_target(26.319_in, 26.319_in, -180_deg);
@@ -740,7 +740,7 @@ void stop_scoring() {
 }
 
 Macro skills_one(
-    [&](){
+    [](){
       imu_odom->setState({13.491_in, 34.9911_in, 0_deg});
 
       move_settings.start_output = 100;
@@ -927,7 +927,7 @@ Macro skills_one(
     {&auton_group});
 
 Macro skills_one_one(
-    [&](){
+    [](){
       imu_odom->setState({13.491_in, 34.9911_in, 0_deg});
       using namespace skillsballs;
 
@@ -1128,7 +1128,7 @@ Macro skills_one_one(
     {&auton_group});
 
 Macro skills_two(
-    [&](){
+    [](){
       using namespace skillsballs;
       auton_init({13.491_in, 34.9911_in, 0_deg}, "skills_two", true);
       stow_after_eject = true;
@@ -1240,7 +1240,7 @@ Macro skills_two(
     {&auton_group});
 
 Macro shawnton_three(
-    [&](){
+    [](){
       imu_odom->setState({15.7416_in, 109.181_in, 90_deg});
 
       add_target(goal_3, 135_deg, 22_in);
@@ -1293,7 +1293,7 @@ Macro shawnton_three(
     {&auton_group});
 
 Macro shawnton_cycle(
-    [&](){
+    [](){
       imu_odom->setState({15.7416_in, 109.181_in, 90_deg});
 
       add_target(23.49_in, 117.18_in, 90_deg);
