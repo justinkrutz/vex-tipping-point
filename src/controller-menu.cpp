@@ -281,7 +281,7 @@ class MenuAutonomous : public MenuFolder {
   }
   
   void run() {
-    odomutilities::errorcorrection::auto_goal_center = false;
+    // odomutilities::errorcorrection::auto_goal_center = false;
     routine_.start();
   }
 
@@ -307,20 +307,20 @@ MenuAutonomous &selected_auton = default_auton;
 
 void create_folder_structure() {
   root_folder = new MenuFolder("", {
-    new MenuAutonomous("Home Row Three", autonroutines::home_row_three),
-    new MenuAutonomous("ShawnTon 3.0", autonroutines::shawnton_three),
-    new MenuAutonomous("Left ShawnTon", autonroutines::left_shawnton),
-    new MenuAutonomous("Right ShawnTon", autonroutines::right_shawnton),
-    new MenuAutonomous("Home Row Two", autonroutines::home_row_two),
-    new MenuFolder("Other", {
-      new MenuAutonomous("Home Row Three Old", autonroutines::home_row_three_old),
-      new MenuAutonomous("shawnton_cycle", autonroutines::shawnton_cycle),
-      new MenuAutonomous("Skills 1.0", autonroutines::skills_one),
-      new MenuAutonomous("Skills 1.1", autonroutines::skills_one_one),
-      new MenuAutonomous("Skills 2.0", autonroutines::skills_two),
-      new MenuAutonomous("None", autonroutines::none),
       new MenuAutonomous("Test", autonroutines::test),
-    })
+    // new MenuAutonomous("Home Row Three", autonroutines::home_row_three),
+    // new MenuAutonomous("ShawnTon 3.0", autonroutines::shawnton_three),
+    // new MenuAutonomous("Left ShawnTon", autonroutines::left_shawnton),
+    // new MenuAutonomous("Right ShawnTon", autonroutines::right_shawnton),
+    // new MenuAutonomous("Home Row Two", autonroutines::home_row_two),
+    // new MenuFolder("Other", {
+    //   new MenuAutonomous("Home Row Three Old", autonroutines::home_row_three_old),
+    //   new MenuAutonomous("shawnton_cycle", autonroutines::shawnton_cycle),
+    //   new MenuAutonomous("Skills 1.0", autonroutines::skills_one),
+    //   new MenuAutonomous("Skills 1.1", autonroutines::skills_one_one),
+    //   new MenuAutonomous("Skills 2.0", autonroutines::skills_two),
+    //   new MenuAutonomous("None", autonroutines::none),
+    // })
   });
 }
 

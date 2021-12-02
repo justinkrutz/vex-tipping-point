@@ -172,102 +172,12 @@ void clear_all_targets() {
   targets_should_clear = true;
 }
 
-void eject_all_but(int balls_to_keep) {
-  using namespace robotfunctions::rollers;
-  eject_queue = balls_in_robot.size() - balls_to_keep;
-}
-
-void splay_intakes_if_running() {
-  using namespace robotfunctions;
-  if (rollers::intake_queue > 0) {
-    intake_splay();
-  }
-}
-
 using namespace controllerbuttons;
 
 // blocking functions
 
 void wait_until_final_target_reached() {
   while (!final_target_reached) {
-    wait(10);
-  }
-}
-
-Macro ball_allign(
-    [](){
-      // int time = pros::millis();
-
-      // while (abs(get_odom_state().theta - goal_center_angle) > 1_deg && pros::millis() - time < 2000) {
-      while (true) {
-        int distance_left = distance_sensor_left.get();
-        int distance_right = distance_sensor_right.get() * 1.15 -18.6;
-        if (InRange(distance_left, 50, 200) && InRange(distance_right, 50, 200)) {
-          // double distance = MIN(distance_left, distance_right);
-          double error = distance_right - distance_left;
-          button_strafe = error;
-        } else {
-          button_strafe = 0;
-        }
-        wait(10);
-      }
-    },
-    [](){
-        button_strafe = 0;
-        button_turn = 0;
-        button_forward = 0;
-    },
-    {&drive_group, &auton_group});
-
-QAngle goal_center_angle;
-
-Macro goal_center(
-    [](){
-      int time = pros::millis();
-
-      while (abs(get_odom_state().theta - goal_center_angle) > 1_deg && pros::millis() - time < 2000) {
-        double speed = 2 * (goal_center_angle - get_odom_state().theta).convert(degree);
-        button_strafe = -speed;
-        button_turn = speed * 0.7;
-        button_forward = 0.04 * (MIN(goal_sensor_one.get_value(), goal_sensor_two.get_value() - 2400));
-        wait(10);
-      }
-    },
-    [](){
-        button_strafe = 0;
-        button_turn = 0;
-        button_forward = 0;
-    },
-    {&drive_group, &auton_group});
-
-void drive_to_goal(odomutilities::Goal goal, QAngle angle, int timeout = 2000) {
-  wait_until_final_target_reached();
-  ObjectSensor goal_os ({&goal_sensor_one, &goal_sensor_two}, 2600, 2750);
-  add_target(goal.point.x, goal.point.y, angle, 12.4_in);
-  int time = pros::millis();
-  while (!goal_os.is_detected && pros::millis() - time < timeout) {
-    goal_os.get_new_found();
-    goal_os.get_new_lost();
-    if (final_target_reached) {
-      clear_all_targets();
-      button_forward = 20;
-    }
-    wait(10);
-  }
-  clear_all_targets();
-  // button_forward = 0;
-  goal_center_angle = angle;
-  goal_center.start();
-}
-
-void score_balls(int balls_to_score) {
-  using namespace robotfunctions::rollers;
-  for (int i = 0; i < balls_to_score; i++) {
-    score_balls_manually = true;
-    score_queue++;
-    wait(200);
-  }
-  while (!score_queue == 0) {
     wait(10);
   }
 }
@@ -292,21 +202,26 @@ void motor_task()
 
   while(1)
   {
-    drivetoposition::update();
+    // drivetoposition::update();
+    
+    int stick_forward = master.get_analog(ANALOG_RIGHT_Y);
+    int stick_turn = master.get_analog(ANALOG_RIGHT_X);
+    controllermenu::master_print_array[1] = std::to_string(stick_forward);
+    controllermenu::master_print_array[2] = std::to_string(stick_turn);
 
-    double forward = button_forward + drivetoposition::forward + master.get_analog(ANALOG_RIGHT_Y) * 0.787401574803;
+    double forward = button_forward + drivetoposition::forward + stick_forward * 0.787401574803;
     // double strafe  = button_strafe + drivetoposition::strafe;
-    double strafe  = button_strafe + drivetoposition::strafe  + master.get_analog(ANALOG_LEFT_X) * 0.787401574803;
+    // double strafe  = button_strafe + drivetoposition::strafe  + master.get_analog(ANALOG_LEFT_X) * 0.787401574803;
     // double strafe  = button_strafe + drivetoposition::strafe  + master.get_analog(ANALOG_RIGHT_X) * 0.787401574803;
-    double temp_turn  = master.get_analog(ANALOG_RIGHT_X) * 0.787401574803;
+    double temp_turn  = stick_turn * 0.787401574803;
     double turn    = button_turn + drivetoposition::turn + temp_turn;
     // double turn    = button_turn + drivetoposition::turn    + pow(abs(temp_turn / 100), 1.8) * 100 * sgn(temp_turn);
-    double sync = std::min(1.0, 100 / (fabs(forward) + fabs(strafe) + fabs(turn)));
+    double sync = std::min(1.0, 100 / (fabs(forward) + fabs(turn)));
 
-    double drive_fl_pct = drive_fl_slew.new_value((forward + strafe + turn) * sync);
-    double drive_fr_pct = drive_fr_slew.new_value((forward - strafe - turn) * sync);
-    double drive_bl_pct = drive_bl_slew.new_value((forward - strafe + turn) * sync);
-    double drive_br_pct = drive_br_slew.new_value((forward + strafe - turn) * sync);
+    double drive_fl_pct = drive_fl_slew.new_value((forward + turn) * sync);
+    double drive_fr_pct = drive_fr_slew.new_value((forward - turn) * sync);
+    double drive_bl_pct = drive_bl_slew.new_value((forward + turn) * sync);
+    double drive_br_pct = drive_br_slew.new_value((forward - turn) * sync);
     // model->left(forward + turn);
     // model->right(forward - turn);
 
@@ -315,7 +230,20 @@ void motor_task()
     // drive_bl->moveVelocity(drive_bl_pct * 2);
     // drive_br->moveVelocity(drive_br_pct * 2);
 
-    model->arcade(master.get_analog(ANALOG_RIGHT_Y), master.get_analog(ANALOG_RIGHT_X));
+    // model->arcade(master.get_analog(ANALOG_RIGHT_Y), master.get_analog(ANALOG_RIGHT_X));
+    // skid_model->getLeftSideMotor()->moveVoltage(stick_forward + stick_turn);
+    // skid_model->getRightSideMotor()->moveVoltage(stick_forward - stick_turn);
+    // skid_model->arcade(stick_forward, stick_turn);
+
+
+    double left_drive = stick_forward + stick_turn;
+    double right_drive = stick_forward - stick_turn;
+    left_front   = left_drive;
+    left_middle  = left_drive;
+    left_back    = left_drive;
+    right_front  = right_drive;
+    right_middle = right_drive;
+    right_back   = right_drive;
 
     pros::delay(5);
   }
@@ -325,37 +253,37 @@ void motor_task()
 
 using namespace controllerbuttons;
 
-Macro goal_turn_right(
-    [](){
-      button_strafe = 100;
-      button_turn = -70;
-      while (true) {
-        button_forward = 0.04 * (MIN(goal_sensor_one.get_value(), goal_sensor_two.get_value() - 2300));
-        wait(10);
-      }
-    },
-    [](){
-        button_strafe = 0;
-        button_turn = 0;
-        button_forward = 0;
-    },
-    {&drive_group});
+// Macro goal_turn_right(
+//     [](){
+//       button_strafe = 100;
+//       button_turn = -70;
+//       while (true) {
+//         button_forward = 0.04 * (MIN(goal_sensor_one.get_value(), goal_sensor_two.get_value() - 2300));
+//         wait(10);
+//       }
+//     },
+//     [](){
+//         button_strafe = 0;
+//         button_turn = 0;
+//         button_forward = 0;
+//     },
+//     {&drive_group});
 
-Macro goal_turn_left(
-    [](){
-      button_strafe = -100;
-      button_turn = 80;
-      while (true) {
-        button_forward = 0.04 * (MIN(goal_sensor_one.get_value(), goal_sensor_two.get_value() - 2300));
-        wait(10);
-      }
-    },
-    [](){
-        button_strafe = 0;
-        button_turn = 0;
-        button_forward = 0;
-    },
-    {&drive_group});
+// Macro goal_turn_left(
+//     [](){
+//       button_strafe = -100;
+//       button_turn = 80;
+//       while (true) {
+//         button_forward = 0.04 * (MIN(goal_sensor_one.get_value(), goal_sensor_two.get_value() - 2300));
+//         wait(10);
+//       }
+//     },
+//     [](){
+//         button_strafe = 0;
+//         button_turn = 0;
+//         button_forward = 0;
+//     },
+//     {&drive_group});
 
 void drive_group_terminate() {
   drive_group.terminate();
@@ -365,12 +293,12 @@ void drive_group_terminate() {
 }
 
 void set_callbacks() {
-  using namespace controllerbuttons;
-  button_handler.master.left.pressed.set_macro(goal_turn_left);
-  button_handler.master.right.pressed.set_macro(goal_turn_right);
-  button_handler.master.left.released.set(drive_group_terminate);
-  button_handler.master.right.released.set(drive_group_terminate);
-  // button_handler.master.right.pressed.set_macro(drivetoposition::ball_allign);
+//   using namespace controllerbuttons;
+//   button_handler.master.left.pressed.set_macro(goal_turn_left);
+//   button_handler.master.right.pressed.set_macro(goal_turn_right);
+//   button_handler.master.left.released.set(drive_group_terminate);
+//   button_handler.master.right.released.set(drive_group_terminate);
+//   // button_handler.master.right.pressed.set_macro(drivetoposition::ball_allign);
 }
 
 } // namespace autondrive
@@ -399,16 +327,17 @@ void auton_log() {
         std::to_string(odom.x.convert(inch)) + "," +
         std::to_string(odom.y.convert(inch)) + "," +
         std::to_string(odom.theta.convert(degree)) + "," +
-        std::to_string(balls_in_robot.size()) + "," +
-        std::to_string(intake_queue) + "," +
-        std::to_string(score_queue) + "," +
-        std::to_string(eject_queue) + "," +
+        // std::to_string(balls_in_robot.size()) + "," +
+        // std::to_string(intake_queue) + "," +
+        // std::to_string(score_queue) + "," +
+        // std::to_string(eject_queue) + "," +
         std::to_string(target_distance_reached) + "," +
         std::to_string(target_heading_reached) + "," +
         std::to_string(final_target_reached) + "," +
-        std::to_string(targets.size()) + "," +
-        std::to_string(goal_sensor_one.get_value()) + "," +
-        std::to_string(goal_sensor_two.get_value()));
+        std::to_string(targets.size()));
+        // std::to_string(targets.size()) + "," +
+        // std::to_string(goal_sensor_one.get_value()) + "," +
+        // std::to_string(goal_sensor_two.get_value()));
     pros::delay(10); 
   }
   
@@ -428,7 +357,7 @@ void auton_log() {
 }
 
 void auton_init(OdomState odom_state, std::string name = "unnamed", bool is_skills = false) {
-  imu_odom->setState(odom_state);
+  // imu_odom->setState(odom_state);
   start_time = pros::millis();
   auton_drive_enabled = true;
   (pros::Task(auton_log));
@@ -436,9 +365,9 @@ void auton_init(OdomState odom_state, std::string name = "unnamed", bool is_skil
 
 void auton_clean_up() {
   clear_all_targets();
-  auton_drive_enabled = false;
-  stow_after_eject = false;
-  button_strafe = 0;
+  // auton_drive_enabled = false;
+  // stow_after_eject = false;
+  // button_strafe = 0;
   button_turn = 0;
   button_forward = 0;
   controllermenu::master_print_array[0] = "Completed";
@@ -457,890 +386,15 @@ Macro test(
       move_settings.end_output = 20;
 
       add_target(18_in, 34.9911_in, 0_deg);
-      add_target(goal_1, -135_deg, 25_in);
-      drive_to_goal(goal_1, -135_deg);
-      add_target(goal_1, -135_deg, 30_in);
-      add_target(goal_1, 0_deg, 30_in, -135_deg);
+      // add_target(goal_1, -135_deg, 25_in);
+      // add_target(goal_1, -135_deg, 30_in);
+      // add_target(goal_1, 0_deg, 30_in, -135_deg);
       add_target(13.491_in, 34.9911_in, 0_deg);
 
       wait_until_final_target_reached();
     },
     [](){
       auton_clean_up();
-    },
-    {&auton_group});
-
-// Our main autonomous routine
-Macro home_row_three(
-    [](){
-      using namespace matchballs;
-      auton_init({15.7416_in, 31.4911_in, -90_deg}, "home_row_three");
-      stow_after_eject = true;
-      move_settings.start_output = 80;
-      move_settings.end_output = 20;
-
-      intake_queue = 3;
-      wait(700);
-      drive_to_goal(goal_1, -135_deg); // at goal 1
-      score_balls(2); // score
-      
-      add_target(goal_1, -135_deg, 29_in); // back away
-      wait_until_final_target_reached();
-      // wait(100);
-      // intakes_back.start();
-      add_target(goal_2, -180_deg, 29_in);
-      eject_queue = 1;
-      wait(1500);
-      // eject_all_but(1); // be extra safe
-
-      intake_queue = 2;
-      // wait_until_final_target_reached();
-      drive_to_goal(goal_2, -180_deg); // at goal 2
-      score_balls(2); // score
-
-      wait(1000);
-      add_target(goal_2, -180_deg, 25_in); // back away
-      eject_queue = 1;
-      // wait_until_final_target_reached();
-      // wait(500);
-      add_target(goal_3, -180_deg, 35_in, -225_deg);
-      // intakes_back.start();
-      // wait(100);
-      // eject_all_but(0);
-      // wait(300);
-      // intakes_back.start();
-
-      wait_until_final_target_reached();
-      add_target(goal_3, -225_deg, 35_in);
-      // intakes_back.terminate();
-      wait(500);
-      // intake_queue = 3;
-      // wait(20);
-      intake_queue = 3;
-      wait(500);
-      drive_to_goal(goal_3, -225_deg); // at goal 3
-      score_balls(2); // score
-
-      add_target(goal_3, -225_deg, 25_in); // back away
-      wait(500);
-      eject_queue = 1;
-
-
-      wait_until_final_target_reached();
-    },
-    [](){
-      auton_clean_up();
-    },
-    {&auton_group});
-
-Macro home_row_three_old(
-    [](){
-      auton_init({15.7416_in, 31.4911_in, -90_deg}, "home_row_three_old");
-
-      move_settings.start_output = 100;
-      move_settings.end_output = 20;
-      
-      add_target(26.319_in, 26.319_in, -90_deg);
-      add_target(26.319_in, 26.319_in, -135_deg);
-      WAIT_UNTIL(final_target_reached)
-      intake_queue = 10;
-      wait(400);
-      top_roller_smart.add_target(45, 30);
-      add_target(20.4_in, 20.4_in, -135_deg);
-      WAIT_UNTIL(final_target_reached)
-      wait(400);
-      intake_queue = 0;
-      intakes_back.start();
-      wait(300);
-      add_target(16_in, 16_in, -135_deg);
-      wait(10);
-      WAIT_UNTIL(final_target_reached)
-      add_target(13.6_in, 13.6_in, -135_deg);
-      wait(200);
-      score_queue = 1;
-      wait(200);
-      targets.pop();
-      // add_target(30_in, 30_in, -135_deg);
-      add_target(26_in, 72_in, -180_deg);
-      // add_target(22_in, 72_in, -180_deg);
-
-      wait(10);
-      WAIT_UNTIL(final_target_reached)
-      add_target(17_in, 72_in, -180_deg);
-      move_settings.start_output = 20;
-      move_settings.end_output = 20;
-      wait(900);
-      score_queue = 1;
-      wait(200);
-      targets.pop();
-      wait(10);
-      // imu_odom->setState({20.75_in, 71.63_in, -171.5_deg});
-
-      move_settings.start_output = 100;
-      move_settings.end_output = 50;
-      wait(10);
-      add_target(32_in, 72_in, -180_deg);
-      wait(10);
-      WAIT_UNTIL(final_target_reached)
-      move_settings.end_output = 20;
-
-      // add_target(32_in, 109_in, -180_deg);
-      add_target(32_in, 116_in, -180_deg);
-      // wait(500);
-      // add_target(32_in, 109_in, -225_deg);
-      add_target(32_in, 116_in, -225_deg);
-      wait(10);
-      WAIT_UNTIL(final_target_reached)
-      intake_queue = 1;
-      wait(500);
-      add_target(23_in, 126_in, -225_deg);
-      wait(10);
-      WAIT_UNTIL(final_target_reached)
-      wait(300);
-      intake_queue = 0;
-      intakes_back.start();
-      wait(30);
-      intakes_back.terminate();
-      wait(270);
-      // add_target(13.6_in, 127_in, -225_deg);
-      add_target(6_in, 150.85_in, -225_deg);
-      wait(500);
-      score_queue = 1;
-      wait(200);
-      targets.pop();
-      wait(10);
-      // wait(200);
-      // add_target(32_in, 109_in, -180_deg);
-      add_target(32_in, 118_in, -225_deg);
-      wait(10);
-      WAIT_UNTIL(final_target_reached)
-      score_queue = 0;
-    },
-    [](){
-      auton_clean_up();
-    },
-    {&auton_group});
-
-Macro home_row_two(
-    [](){
-      imu_odom->setState({15.7416_in, 31.4911_in, -90_deg});
-
-      move_settings.start_output = 100;
-      move_settings.end_output = 20;
-      
-      add_target(26.319_in, 26.319_in, -90_deg);
-      add_target(26.319_in, 26.319_in, -135_deg);
-      WAIT_UNTIL(final_target_reached)
-      intake_queue = 10;
-      wait(400);
-      top_roller_smart.add_target(45, 30);
-      add_target(20.4_in, 20.4_in, -135_deg);
-      WAIT_UNTIL(final_target_reached)
-      wait(400);
-      intake_queue = 0;
-      intakes_back.start();
-      wait(300);
-      add_target(16_in, 16_in, -135_deg);
-      WAIT_UNTIL(final_target_reached)
-      add_target(13.6_in, 13.6_in, -135_deg);
-      wait(200);
-      score_queue = 1;
-      wait(200);
-      targets.pop();
-      // add_target(30_in, 30_in, -135_deg);
-      add_target(26_in, 72_in, -180_deg);
-      // add_target(22_in, 72_in, -180_deg);
-
-      WAIT_UNTIL(final_target_reached)
-      add_target(17_in, 72_in, -180_deg);
-      move_settings.start_output = 20;
-      move_settings.end_output = 20;
-      wait(500);
-      score_queue = 1;
-      wait(200);
-      targets.pop();
-      wait(10);
-      move_settings.start_output = 100;
-      move_settings.end_output = 50;
-      add_target(32_in, 72_in, -180_deg);
-      WAIT_UNTIL(final_target_reached)
-      move_settings.end_output = 20;
-      score_queue = 0;
-    },
-    [](){
-      targets_should_clear = true;
-    },
-    {&auton_group});
-
-Macro left_shawnton(
-    [](){
-      imu_odom->setState({15.7416_in, 31.4911_in, -90_deg});
-
-      add_target(26.319_in, 26.319_in, -90_deg);
-      add_target(26.319_in, 26.319_in, -135_deg);
-      add_target(16_in, 16_in, -135_deg);
-      WAIT_UNTIL(final_target_reached)
-      add_target(13.6_in, 13.6_in, -135_deg);
-      intake_left.move_relative(30, 200);
-      intake_right.move_relative(30, 200);
-      wait(500);
-      intake_left.move_relative(-30, 200);
-      intake_right.move_relative(-30, 200);
-      top_roller_smart.add_target(45, 30);
-      wait(500);
-      score_queue = 1;
-      wait(200);
-      targets.pop();
-      wait(500);
-      add_target(30_in, 30_in, -135_deg);
-      WAIT_UNTIL(final_target_reached)
-    },
-    [](){
-      targets_should_clear = true;
-    },
-    {&auton_group});
-
-Macro right_shawnton(
-    [](){
-      imu_odom->setState({31.4911_in, 15.7416_in, -180_deg});
-
-      add_target(26.319_in, 26.319_in, -180_deg);
-      WAIT_UNTIL(final_target_reached)
-      add_target(26.319_in, 26.319_in, -135_deg);
-      wait(500);
-      targets.pop();
-      add_target(16_in, 16_in, -135_deg);
-      WAIT_UNTIL(final_target_reached)
-      add_target(13.6_in, 13.6_in, -135_deg);
-      intake_left.move_relative(30, 200);
-      intake_right.move_relative(30, 200);
-      wait(500);
-      intake_left.move_relative(-30, 200);
-      intake_right.move_relative(-30, 200);
-      top_roller_smart.add_target(45, 30);
-      wait(500);
-      score_queue = 1;
-      wait(200);
-      targets.pop();
-      wait(500);
-      add_target(30_in, 30_in, -135_deg);
-      WAIT_UNTIL(final_target_reached)
-    },
-    [](){
-      targets_should_clear = true;
-    },
-    {&auton_group});
-
-void stop_scoring() {
-  score_queue = 0;
-  top_roller_smart.target_queue = {};
-  // top_roller_smart.set_manual_speed(0, 0);
-  // top_roller_smart.set_manual_speed(1, 0);
-  top_roller_smart.auto_speed = 0;
-}
-
-Macro skills_one(
-    [](){
-      imu_odom->setState({13.491_in, 34.9911_in, 0_deg});
-
-      move_settings.start_output = 100;
-      move_settings.end_output = 20;
-
-      intake_queue = 1;
-      add_target(18_in, 34.9911_in, 0_deg);
-      add_target(5.8129_in, 5.8129_in, -135_deg, 17_in);
-      wait(500);
-      intakes_back.start();
-      WAIT_UNTIL(final_target_reached)
-      add_target(5.8129_in, 5.8129_in, -135_deg, 6_in);
-      wait(500);
-      score_queue = 1;
-      wait(300);
-      targets.pop();
-
-      stop_scoring();
-      add_target(5.9272_in, 70.3361_in, -180_deg, 20_in);
-      WAIT_UNTIL(final_target_reached)
-      add_target(5.9272_in, 70.3361_in, -180_deg, 6_in);
-      wait(600);
-      score_queue = 1;
-      wait(400);
-      targets.pop();
-
-      stop_scoring();
-      // move_settings.end_output = 100;
-      add_target(23_in, 70.3361_in, -180_deg);
-      add_target(23_in, 90_in, -270_deg);
-      WAIT_UNTIL(final_target_reached)
-      intake_queue = 1;
-      add_target(23_in, 117.18_in, -270_deg);
-      // move_settings.end_output = 20;
-      WAIT_UNTIL(final_target_reached)
-      intakes_back.start();
-      add_target(5.8129_in, 134.8593_in, -225_deg, 24.5_in);
-      WAIT_UNTIL(final_target_reached)
-      add_target(5.8129_in, 134.8593_in, -225_deg, 6_in);
-      wait(1000);
-      score_queue = 1;
-      wait(400);
-      targets.pop();
-
-      stop_scoring();
-      add_target(23_in, 117.18_in, -270_deg);
-      WAIT_UNTIL(final_target_reached)
-      // intake_right.move_relative(180, 200);
-      add_target(34.8361_in, 123.6722_in, -270_deg);
-      WAIT_UNTIL(final_target_reached)
-      intake_queue = 1;
-      wait(1000);
-      intakes_back.start();
-      add_target(70.3361_in, 117.4624_in, -360_deg, 12_in);
-      WAIT_UNTIL(final_target_reached)
-      intake_queue = 1;
-      add_target(70.3361_in, 117.4624_in, -360_deg);
-      wait(1000);
-      intakes_back.start();
-      add_target(70.3361_in, 117.4624_in, -270_deg);
-      WAIT_UNTIL(final_target_reached)
-      add_target(70.3361_in, 134.745_in, -270_deg, 6_in);
-      wait(500);
-      score_queue = 2;
-      wait(700);
-      targets.pop();
-
-      stop_scoring();
-      add_target(70.3361_in, 117.4624_in, -270_deg);
-      WAIT_UNTIL(final_target_reached)
-      // intake_right.move_relative(180, 200);
-      add_target(105.8361_in, 123.6722_in, -270_deg);
-      WAIT_UNTIL(final_target_reached)
-      intake_queue = 1;
-      wait(1000);
-      intakes_back.start();
-      add_target(134.8593_in, 134.8593_in, -315_deg, 17_in);
-      WAIT_UNTIL(final_target_reached)
-      add_target(134.8593_in, 134.8593_in, -315_deg, 6_in);
-      wait(300);
-      score_queue = 1;
-      wait(300);
-      targets.pop();
-
-      stop_scoring();
-      add_target(118_in, 125_in, -360_deg);
-      add_target(118_in, 125_in, -450_deg);
-      add_target(117.6361_in, 105.6361_in, -450_deg, 12_in);
-      WAIT_UNTIL(final_target_reached)
-      intake_queue = 1;
-      add_target(117.6361_in, 70.3361_in, -450_deg);
-      wait(1000);
-      intakes_back.start();
-      add_target(117.6361_in, 70.3361_in, -360_deg);
-      WAIT_UNTIL(final_target_reached)
-      add_target(134.745_in,  70.3361_in, -360_deg, 6_in);
-      wait(1000);
-      score_queue = 1;
-      wait(200);
-      targets.pop();
-
-      stop_scoring();
-      add_target(117.6361_in, 70.3361_in, -360_deg);
-      add_target(117.6361_in, 35.0361_in, -450_deg, 12_in);
-      WAIT_UNTIL(final_target_reached)
-      intake_queue = 1;
-      add_target(117.1816_in, 23.4906_in, -450_deg);
-      WAIT_UNTIL(final_target_reached)
-      intakes_back.start();
-      add_target(134.8593_in, 5.8129_in, -405_deg, 24.5_in);
-      WAIT_UNTIL(final_target_reached)
-      add_target(134.8593_in, 5.8129_in, -405_deg, 6_in);
-      wait(700);
-      score_queue = 1;
-      wait(400);
-      targets.pop();
-
-      stop_scoring();
-      add_target(117.1816_in, 23.4906_in, -450_deg);
-      WAIT_UNTIL(final_target_reached)
-      // intake_right.move_relative(180, 200);
-      add_target(106.8361_in, 3.3361_in, -450_deg , 13_in);
-      WAIT_UNTIL(final_target_reached)
-      intake_queue = 1;
-      wait(1000);
-      intakes_back.start();
-      add_target(70.3361_in, 23.3361_in, -540_deg, 13_in);
-      WAIT_UNTIL(final_target_reached)
-      intake_queue = 1;
-      add_target(70.3361_in, 23.3361_in, -540_deg);
-      wait(1000);
-      intakes_back.start();
-      wait(300);
-      add_target(70.3361_in, 23.3361_in, -450_deg);
-      WAIT_UNTIL(final_target_reached)
-      add_target(70.3361_in, 5.9272_in, -450_deg, 6_in);
-      wait(600);
-      score_queue = 2;
-      wait(1700);
-      targets.pop();
-
-      stop_scoring();
-      add_target(70.3361_in, 23.3361_in, -450_deg);
-      add_target(70.3361_in, 23.3361_in, -270_deg);
-      add_target(70.3361_in, 46.8361_in, -270_deg, 14_in);
-      WAIT_UNTIL(final_target_reached)
-      intake_queue = 1;
-      wait(1000);
-      add_target(70.3361_in, 70.3361_in, -270_deg, 16_in);
-      WAIT_UNTIL(final_target_reached)
-      add_target(70.3361_in, 70.3361_in, -270_deg, 6_in);
-      wait(300);
-      intake_queue = 50;
-      wait(200);
-      targets.pop();
-
-      button_strafe = 10;
-      button_turn = -6.84;
-      button_forward = 3;
-      wait(2000);
-      button_strafe = -10;
-      button_turn = 6.84;
-      button_forward = 3;
-      wait(3000);
-      intake_queue = 1;
-      score_queue = 1;
-      button_strafe = 10;
-      button_turn = -6.84;
-      button_forward = 3;
-      // wait(4000);
-      WAIT_UNTIL(intake_queue == 0)
-      button_strafe = 0;
-      button_turn = 0;
-      button_forward = 0;
-
-      intakes_back.start();
-    },
-    [](){
-      button_strafe = 0;
-      button_turn = 0;
-      button_forward = 0;
-      targets_should_clear = true;
-    },
-    {&auton_group});
-
-Macro skills_one_one(
-    [](){
-      imu_odom->setState({13.491_in, 34.9911_in, 0_deg});
-      using namespace skillsballs;
-
-      move_settings.start_output = 100;
-      move_settings.end_output = 20;
-
-      intake_queue = 1;
-      add_target(18_in, 34.9911_in, 0_deg);
-      add_target(5.8129_in, 5.8129_in, -135_deg, 17_in);
-      wait(500);
-      intakes_back.start();
-      WAIT_UNTIL(final_target_reached)
-      add_target(5.8129_in, 5.8129_in, -135_deg, 6_in);
-      wait(500);
-      score_queue = 1;
-      wait(300);
-      targets.pop();
-      stop_scoring();
-
-      add_target(ball_e, -300_deg, 14_in);
-      WAIT_UNTIL(final_target_reached)
-      intake_queue = 1;
-      wait(700);
-      intakes_back.start();
-
-      add_target(5.9272_in, 70.3361_in, -180_deg, 20_in);
-      WAIT_UNTIL(final_target_reached)
-      add_target(5.9272_in, 70.3361_in, -180_deg, 6_in);
-      wait(600);
-      score_queue = 2;
-      wait(1000);
-      targets.pop();
-
-      stop_scoring();
-      // move_settings.end_output = 100;
-      add_target(23_in, 70.3361_in, -180_deg);
-      add_target(23_in, 90_in, -270_deg);
-      WAIT_UNTIL(final_target_reached)
-      intake_queue = 1;
-      add_target(23_in, 117.18_in, -270_deg);
-      // move_settings.end_output = 20;
-      WAIT_UNTIL(final_target_reached)
-      intakes_back.start();
-      add_target(5.8129_in, 134.8593_in, -225_deg, 24.5_in);
-      WAIT_UNTIL(final_target_reached)
-      add_target(5.8129_in, 134.8593_in, -225_deg, 6_in);
-      wait(1000);
-      score_queue = 1;
-      wait(400);
-      targets.pop();
-
-      stop_scoring();
-      add_target(23_in, 117.18_in, -270_deg);
-      WAIT_UNTIL(final_target_reached)
-      // intake_right.move_relative(180, 200);
-      add_target(34.8361_in, 123.6722_in, -270_deg);
-      WAIT_UNTIL(final_target_reached)
-      intake_queue = 1;
-      wait(1000);
-      intakes_back.start();
-      add_target(70.3361_in, 117.4624_in, -360_deg, 12_in);
-      WAIT_UNTIL(final_target_reached)
-      intake_queue = 1;
-      add_target(70.3361_in, 117.4624_in, -360_deg);
-      wait(1000);
-      intakes_back.start();
-      add_target(70.3361_in, 117.4624_in, -270_deg);
-      WAIT_UNTIL(final_target_reached)
-      add_target(70.3361_in, 134.745_in, -270_deg, 6_in);
-      wait(500);
-      score_queue = 2;
-      wait(700);
-      targets.pop();
-
-      stop_scoring();
-      add_target(70.3361_in, 117.4624_in, -270_deg);
-      WAIT_UNTIL(final_target_reached)
-      // intake_right.move_relative(180, 200);
-      add_target(105.8361_in, 123.6722_in, -270_deg);
-      WAIT_UNTIL(final_target_reached)
-      intake_queue = 1;
-      wait(1000);
-      intakes_back.start();
-      add_target(134.8593_in, 134.8593_in, -315_deg, 17_in);
-      WAIT_UNTIL(final_target_reached)
-      add_target(134.8593_in, 134.8593_in, -315_deg, 6_in);
-      wait(300);
-      score_queue = 1;
-      wait(300);
-      targets.pop();
-
-      stop_scoring();
-      add_target(118_in, 125_in, -360_deg);
-      add_target(118_in, 125_in, -450_deg);
-      add_target(117.6361_in, 105.6361_in, -450_deg, 13_in);
-      WAIT_UNTIL(final_target_reached)
-      intake_queue = 1;
-      wait(1000);
-      intakes_back.start();
-
-      add_target(ball_j, -480_deg, 14_in);
-      WAIT_UNTIL(final_target_reached)
-      intake_queue = 1;
-      wait(700);
-      intakes_back.start();
-      add_target(117.6361_in, 70.3361_in, -450_deg);
-
-      add_target(117.6361_in, 70.3361_in, -360_deg);
-      WAIT_UNTIL(final_target_reached)
-      add_target(134.745_in,  70.3361_in, -360_deg, 6_in);
-      wait(1000);
-      score_queue = 2;
-      wait(1000);
-      targets.pop();
-
-      stop_scoring();
-      add_target(117.6361_in, 70.3361_in, -360_deg);
-      add_target(117.6361_in, 35.0361_in, -450_deg, 13_in);
-      WAIT_UNTIL(final_target_reached)
-      intake_queue = 1;
-      add_target(117.1816_in, 23.4906_in, -450_deg);
-      WAIT_UNTIL(final_target_reached)
-      intakes_back.start();
-      add_target(134.8593_in, 5.8129_in, -405_deg, 24.5_in);
-      WAIT_UNTIL(final_target_reached)
-      add_target(134.8593_in, 5.8129_in, -405_deg, 6_in);
-      wait(700);
-      score_queue = 1;
-      wait(400);
-      targets.pop();
-
-      stop_scoring();
-      add_target(117.1816_in, 23.4906_in, -450_deg);
-      WAIT_UNTIL(final_target_reached)
-      // intake_right.move_relative(180, 200);
-      add_target(106.8361_in, 3.3361_in, -450_deg , 13_in);
-      WAIT_UNTIL(final_target_reached)
-      intake_queue = 1;
-      wait(1000);
-      intakes_back.start();
-      add_target(70.3361_in, 23.3361_in, -540_deg, 13_in);
-      WAIT_UNTIL(final_target_reached)
-      intake_queue = 1;
-      add_target(70.3361_in, 23.3361_in, -540_deg);
-      wait(1000);
-      intakes_back.start();
-      wait(300);
-      add_target(70.3361_in, 23.3361_in, -450_deg);
-      WAIT_UNTIL(final_target_reached)
-      add_target(70.3361_in, 5.9272_in, -450_deg, 6_in);
-      wait(600);
-      score_queue = 2;
-      wait(1700);
-      targets.pop();
-
-      stop_scoring();
-      add_target(70.3361_in, 23.3361_in, -450_deg);
-      add_target(70.3361_in, 23.3361_in, -270_deg);
-      add_target(70.3361_in, 46.8361_in, -270_deg, 14_in);
-      WAIT_UNTIL(final_target_reached)
-      intake_queue = 1;
-      wait(1000);
-      add_target(70.3361_in, 70.3361_in, -270_deg, 16_in);
-      WAIT_UNTIL(final_target_reached)
-      add_target(70.3361_in, 70.3361_in, -270_deg, 6_in);
-      wait(300);
-      intake_queue = 50;
-      wait(200);
-      targets.pop();
-
-      button_strafe = 10;
-      button_turn = -6.84;
-      button_forward = 3;
-      wait(1000);
-      button_strafe = -10;
-      button_turn = 6.84;
-      button_forward = 3;
-      wait(2000);
-      intake_queue = 1;
-      score_queue = 1;
-      button_strafe = 10;
-      button_turn = -6.84;
-      button_forward = 3;
-      // wait(4000);
-      WAIT_UNTIL(intake_queue == 0)
-      button_strafe = 0;
-      button_turn = 0;
-      button_forward = 0;
-
-      intakes_back.start();
-    },
-    [](){
-      button_strafe = 0;
-      button_turn = 0;
-      button_forward = 0;
-      targets_should_clear = true;
-    },
-    {&auton_group});
-
-Macro skills_two(
-    [](){
-      using namespace skillsballs;
-      auton_init({13.491_in, 34.9911_in, 0_deg}, "skills_two", true);
-      stow_after_eject = true;
-
-      move_settings.start_output = 100;
-      move_settings.end_output = 20;
-
-      QLength ball_field_offset = 12_in;
-      QLength ball_wall_offset = 15_in;
-
-      intake_queue = 4;
-      add_target(ball_c, -90_deg, ball_wall_offset);
-      drive_to_goal(goal_1, -135_deg);
-      score_balls(3);
-
-      // pick up the two balls ===================
-      add_target(goal_1, -122.42_deg, 30_in);
-      wait(500);
-      eject_queue = 2;
-      wait(300);
-      // add_target(ball_e, -180_deg, 40_in, -302.42_deg);
-      // eject_all_but(1);
-      // wait_until_final_target_reached();
-      add_target(ball_e, -302.42_deg, ball_field_offset, false);
-      // intakes_back.start();
-      // wait(630);
-      wait_until_final_target_reached();
-      intake_queue = 1;
-      wait(400);
-      add_target(ball_h, -315_deg, ball_field_offset);
-      wait(300);
-      intakes_back.start();
-      wait_until_final_target_reached();
-      intake_queue = 1;
-      wait(700);
-      intakes_back.start();
-
-      drive_to_goal(goal_2, -180_deg, 3000);
-      intake_queue = 1;
-      score_balls(2);
-
-      add_target(goal_2, -135_deg, 25_in, -180_deg);
-      wait(200);
-      eject_queue = 1;
-      wait(500);
-      add_target(ball_b, -270_deg, ball_field_offset);
-      wait_until_final_target_reached();
-      intake_queue = 1;
-      wait(400);
-      add_target(goal_3, -225_deg, 20_in);
-      wait_until_final_target_reached();
-      intake_queue = 2;
-      drive_to_goal(goal_3, -225_deg);
-      score_balls(1);
-
-      add_target(ball_d, -180_deg, 25_in, -270_deg);
-      wait(500);
-      eject_queue = 2;
-      wait_until_final_target_reached();
-      wait(500);
-      add_target(ball_d, -270_deg, ball_wall_offset);
-      wait(500);
-      intake_queue = 1;
-      add_target(ball_i, -270_deg, 30_in);
-      wait_until_final_target_reached();
-      intake_queue = 2;
-      drive_to_goal(goal_6, -270_deg);
-      score_balls(2);
-
-      /* ======================= untested from here on ======================= */
-
-      add_target(goal_6, -270_deg, 25_in);
-      wait_until_final_target_reached();
-      add_target(goal_6, -200_deg, 25_in, -270_deg);
-      wait(300);
-      eject_queue = 1;
-      wait(500);
-      add_target(ball_l, -270_deg, 25_in);
-      add_target(ball_l, -270_deg, ball_wall_offset);
-      wait_until_final_target_reached();
-      intake_queue = 1;
-      wait(700);
-
-      add_target(goal_9, -315_deg, 25_in);
-      wait_until_final_target_reached();
-      intake_queue = 2;
-      drive_to_goal(goal_9, -315_deg);
-      score_balls(2);
-      add_target(goal_9, -270_deg, 25_in, -315_deg);
-      wait_until_final_target_reached();
-      add_target(goal_9, -450_deg, 25_in, -315_deg);
-      wait(300);
-      eject_queue = 1;
-      wait(500);
-      add_target(ball_n, -450_deg, ball_field_offset);
-      wait_until_final_target_reached();
-      intake_queue = 1;
-      wait(700);
-
-      
-
-
-
-      wait_until_final_target_reached();
-    },
-    [](){
-      auton_clean_up();
-    },
-    {&auton_group});
-
-Macro shawnton_three(
-    [](){
-      imu_odom->setState({15.7416_in, 109.181_in, 90_deg});
-
-      add_target(goal_3, 135_deg, 22_in);
-      WAIT_UNTIL(final_target_reached)
-      intake_queue = 2;
-      wait(700);
-      drive_to_goal(goal_3, 135_deg);
-      score_balls(1);
-
-
-      add_target(5.8129_in, 134.8593_in, 135_deg, 20_in);
-      WAIT_UNTIL(final_target_reached)
-      add_target(goal_6, 0_deg, 20_in, 40_deg);
-      add_target(70.3361_in, 130.7450_in, 25_deg, 20_in);
-      wait(300);
-      intake_queue = 1;
-
-      WAIT_UNTIL(final_target_reached)
-      add_target(70.3361_in, 130.7450_in, 25_deg, 6_in, 25_deg);
-      wait(1000);
-      clear_all_targets();
-
-      add_target(70.3361_in, 134.745_in, 40_deg, 20_in);
-      WAIT_UNTIL(final_target_reached)
-      intakes_back.start();
-      wait(300);
-      drive_to_goal(goal_6, 30_deg);
-      score_balls(1);
-      add_target(goal_6, 30_deg, 20_in);
-      // add_target(70.3361_in, 134.745_in, 30_deg, 20_in);
-
-      add_target(goal_5, 0_deg, 24_in);
-      WAIT_UNTIL(final_target_reached)
-      drive_to_goal(goal_5, 0_deg);
-      // wait(1200);
-      score_balls(1);
-      intake_left.move_relative(50, 200);
-      intake_right.move_relative(50, 200);
-      wait(800);
-      intake_left.move_relative(-50, 200);
-      intake_right.move_relative(-50, 200);
-      // wait(300);
-      // targets.pop();
-      add_target(70.3361_in, 70.3361_in, 0_deg, 16_in);
-      WAIT_UNTIL(final_target_reached)
-    },
-    [](){
-      targets_should_clear = true;
-    },
-    {&auton_group});
-
-Macro shawnton_cycle(
-    [](){
-      imu_odom->setState({15.7416_in, 109.181_in, 90_deg});
-
-      add_target(23.49_in, 117.18_in, 90_deg);
-      add_target(5.8129_in, 134.8593_in, 135_deg, 25_in);
-      add_target(5.8129_in, 134.8593_in, 135_deg, 16_in);
-      // add_target(5.8129_in, 134.8593_in, 135_deg, 16_in);
-      wait(10);
-      WAIT_UNTIL(final_target_reached)
-      intake_queue = 1;
-      wait(800);
-      intake_left = 0;
-      intake_right = 0;
-      intake_left.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-      intake_right.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-      add_target(5.8129_in, 134.8593_in, 135_deg, 25_in);
-      add_target(5.8129_in, 134.8593_in, 135_deg, 16_in);
-      wait(10);
-      WAIT_UNTIL(final_target_reached)
-      add_target(5.8129_in, 134.8593_in, 135_deg, 6_in);
-      wait(300);
-      score_queue = 2;
-      wait(1000);
-      targets.pop();
-
-      intake_queue = 1;
-      wait(800);
-      intake_left = 0;
-      intake_right = 0;
-      intake_left.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-      intake_right.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-      intake_queue = 1;
-      wait(800);
-      intake_left = 0;
-      intake_right = 0;
-      intake_left.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-      intake_right.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-      score_queue = 1;
-      intakes_back.start();
-      wait(200);
-
-      add_target(5.8129_in, 134.8593_in, 135_deg, 20_in);
-      wait(10);
-      
-      WAIT_UNTIL(final_target_reached)
-    },
-    [](){
-      targets_should_clear = true;
     },
     {&auton_group});
 
