@@ -28,8 +28,8 @@ OdomState get_odom_state() {
     flip = -1;
     theta_offset = 0;
   }
-  // OdomState state({pos.x*1_m*flip, pos.y*1_m*flip, fmod(theta - theta_offset, 360)*1_deg});
-  OdomState state({pos.x*1_m*flip, pos.y*1_m*flip, fmod(pos.yaw - theta_offset, 360)*1_deg});
+  OdomState state({pos.x*1_m*flip, pos.y*1_m*flip, fmod(theta, 360)*1_deg});
+  // OdomState state({pos.x*1_m*flip, pos.y*1_m*flip, fmod(pos.yaw - theta_offset, 360)*1_deg});
   return state;
   // return imu_odom->getState();
 }
@@ -40,12 +40,14 @@ double button_forward = 0;
 
 namespace drivetoposition {
 
-Target::Target(bool is_fwd, QLength x, QLength y, QAngle theta, bool hold, bool is_turn) : x(x), y(y), theta(theta), hold(hold), is_turn(is_turn), is_fwd(is_fwd) {}
+Target::Target(QLength x, QLength y, QAngle theta, bool hold, bool is_turn) : x(x), y(y), theta(theta), hold(hold), is_turn(is_turn) {}
 
 void Target::init_if_new() {
   if (is_new) {
     is_new = false;
     starting_state = get_odom_state();
+    left_front.tare_position();
+    right_front.tare_position();
   }
 }
 
@@ -94,6 +96,10 @@ void update() {
   double move_speed;
   double turn_speed;
 
+  double x_d = target.x.convert(inch);
+
+  double distance_moved = fabs(((right_front.get_position() + left_front.get_position())/2)*5.62753492038/360);
+
   Point target_point{target.x, target.y};
 
   OdomState target_state{target.x, target.y, target.theta};
@@ -106,7 +112,7 @@ void update() {
   QAngle total_angle = target.theta - target.starting_state.theta;
 
 
-  if (distance_traveled >= total_distance) {
+  if (fabs(x_d) <= distance_moved) {
     target_distance_reached = true;
   }
 
@@ -130,7 +136,7 @@ void update() {
     // move_speed = std::min(100.0, 5 * distance_to_target.convert(inch));
     move_speed = 0;
   } else {
-    move_speed = rampMath(distance_traveled.convert(inch), total_distance.convert(inch), move_settings);
+    move_speed = rampMath(distance_moved, fabs(x_d), move_settings);
   }
 
 
@@ -145,9 +151,10 @@ void update() {
     forward = 0;
     strafe = 0;
   } else {
-    turn = 0;
+    // turn = 0;
     // controllermenu::master_print_array[2] = "d " + std::to_string(direction.convert(degree));
-    forward = 20 * (target.is_fwd*2-1);
+    forward = move_speed * (fabs(x_d)/x_d);
+    // forward = 20 * (target.is_fwd*2-1);
     // forward = move_speed * cos(direction.convert(radian));
     // forward = move_speed;
     // strafe  = move_speed * sin(direction.convert(radian));
@@ -156,47 +163,39 @@ void update() {
   controllermenu::master_print_array[2] = "f " + std::to_string(int(forward)) + " t " + std::to_string(int(turn)) + " s " + std::to_string(int(strafe));
 }
 
-void add_target(bool is_fwd, QLength x, QLength y, QAngle theta, QLength offset_distance, QAngle offset_angle, bool hold = true, bool is_turn = false) {
+void add_target(QLength x, QLength y, QAngle theta, QLength offset_distance, QAngle offset_angle, bool hold = true, bool is_turn = false) {
   QLength x_offset = cos(offset_angle) * offset_distance;
   QLength y_offset = sin(offset_angle) * offset_distance;
   final_target_reached = false;
-  target_queue.push({is_fwd, x - x_offset, y - y_offset, theta, hold, is_turn});
+  target_queue.push({x - x_offset, y - y_offset, theta, hold, is_turn});
 }
 
-void add_target(bool is_fwd, QLength x, QLength y, QAngle theta, QLength offset_distance, bool hold = true) {
-  add_target(is_fwd, x, y, theta, offset_distance, theta, hold);
+void add_target(QLength x, QLength y, QAngle theta, QLength offset_distance, bool hold = true) {
+  add_target(x, y, theta, offset_distance, theta, hold);
 }
 
-void add_target(bool is_fwd, QLength x, QLength y, QAngle theta, bool hold = true) {
-  add_target(is_fwd, x, y, theta, 0_in, hold);
+void add_target(QLength x, QLength y, QAngle theta, bool hold = true) {
+  add_target(x, y, theta, 0_in, hold);
 }
 
-void add_target(bool is_fwd, odomutilities::Goal goal, QAngle theta, QLength offset_distance, QAngle offset_angle, bool hold = true) {
-  add_target(is_fwd, goal.point.x, goal.point.y, theta, offset_distance, offset_angle, hold);
+void add_target(Point point, QAngle theta, QLength offset_distance, QAngle offset_angle, bool hold = true) {
+  add_target(point.x, point.y, theta, offset_distance, offset_angle, hold);
 }
 
-void add_target(bool is_fwd, odomutilities::Goal goal, QAngle theta, QLength offset_distance, bool hold = true) {
-  add_target(is_fwd, goal, theta, offset_distance, theta, hold);
+void add_target(Point point, QAngle theta, QLength offset_distance, bool hold = true) {
+  add_target(point, theta, offset_distance, theta, hold);
 }
 
-void add_target(bool is_fwd, odomutilities::Goal goal, QAngle theta, bool hold = true) {
-  add_target(is_fwd, goal, theta, 0_in, hold);
-}
-
-void add_target(bool is_fwd, Point point, QAngle theta, QLength offset_distance, QAngle offset_angle, bool hold = true) {
-  add_target(is_fwd, point.x, point.y, theta, offset_distance, offset_angle, hold);
-}
-
-void add_target(bool is_fwd, Point point, QAngle theta, QLength offset_distance, bool hold = true) {
-  add_target(is_fwd, point, theta, offset_distance, theta, hold);
-}
-
-void add_target(bool is_fwd, Point point, QAngle theta, bool hold = true) {
-  add_target(is_fwd, point, theta, 0_in, hold);
+void add_target(Point point, QAngle theta, bool hold = true) {
+  add_target(point, theta, 0_in, hold);
 }
 
 void add_target(QAngle theta, bool hold = true) {
-  add_target(true, 0_in, 0_in, theta, 0_in, 0_deg, hold, true);
+  add_target(0_in, 0_in, theta, 0_in, 0_deg, hold, true);
+}
+
+void add_target(QLength distance, QAngle theta, bool hold = true) {
+  add_target(distance, 0_in, theta, 0_in, hold);
 }
 
 void clear_all_targets() {
@@ -440,17 +439,18 @@ Macro test(
     [](){
       auton_init({0_in, 0_in, 0_deg});
 
-      move_settings.start_output = 100;
+      move_settings.start_output = 20;
       move_settings.end_output = 20;
 
       // add_target(90_deg);
-      add_target(true, 20_in, 0_in, 360_deg);
+      add_target(10_in, 360_deg);
+      add_target(90_deg);
       wait_until_final_target_reached();
       wait(1000);
-      add_target(false, 10_in, 0_in, 360_deg);
+      add_target(-20_in, 90_deg);
       wait_until_final_target_reached();
       wait(1000);
-      add_target(false, 0_in, 0_in, 360_deg);
+      add_target(10_in, 360_deg);
       // add_target(90_deg);
       // add_target(360_deg);
       // add_target(270_deg);
@@ -472,24 +472,35 @@ Macro blue_wp(
     [](){
       auton_init({57_in, 32_in, 314_deg});
 
-      move_settings.start_output = 100;
+      move_settings.start_output = 20;
       move_settings.end_output = 20;
 
       // add_target(315_deg);
-      lift_motor.move_absolute(500, 50);
-      add_target(true, 57_in, 32_in, 315_deg, -16_in);
+      lift_motor.move_absolute(230, 100);
+      wait(1000);
+      add_target(17_in, 315_deg);
       wait_until_final_target_reached();
-      // lift_gripper.set_value(1);
-      lift_motor.move_absolute(380, 50);
       wait(500);
       lift_gripper.set_value(0);
       wait(200);
-      add_target(true, 57_in, 32_in, 315_deg, -10_in);
+      add_target(-6_in, 315_deg);
       wait(500);
-      lift_motor.move_absolute(10, 50);
-      add_target(true, 57_in, 32_in, 315_deg, -16_in);
+      lift_motor.move_absolute(10, 100);
+      wait(1000);
+      add_target(8_in, 315_deg);
       wait_until_final_target_reached();
+      wait(500);
       lift_gripper.set_value(1);
+      wait(500);
+      lift_motor.move_absolute(50, 100);
+      add_target(360_deg);
+      add_target(-78_in, 360_deg);
+      add_target(-290_deg);
+      add_target(-8_in, -290_deg);
+      wait_until_final_target_reached();
+      ring_motor.move_velocity(300);
+      wait(1500);
+      ring_motor.move_velocity(0);
 
       wait_until_final_target_reached();
     },

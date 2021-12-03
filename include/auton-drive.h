@@ -22,10 +22,8 @@ namespace drivetoposition {
 
 class Target {
  public:
-  Target(bool is_fwd, QLength x, QLength y, QAngle theta, bool hold = true, bool is_turn = true);
+  Target(QLength x, QLength y, QAngle theta, bool hold = true, bool is_turn = true);
 
-
-  bool is_fwd;
   QLength x = 0_in;
   QLength y = 0_in;
   QAngle theta = 0_deg;
