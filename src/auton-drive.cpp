@@ -21,13 +21,15 @@ bool is_blue = true;
 
 OdomState get_odom_state() {
   auto pos = gps.get_status();
+  auto theta = imu.get_heading();
   int flip = 1;
-  QAngle theta_offset = 180_deg;
+  double theta_offset = 180;
   if (!is_blue){
     flip = -1;
-    theta_offset = 0_deg;
+    theta_offset = 0;
   }
-  OdomState state({pos.x*1_m*flip, pos.y*1_m*flip, pos.yaw*1_deg - theta_offset});
+  // OdomState state({pos.x*1_m*flip, pos.y*1_m*flip, fmod(theta - theta_offset, 360)*1_deg});
+  OdomState state({pos.x*1_m*flip, pos.y*1_m*flip, fmod(pos.yaw - theta_offset, 360)*1_deg});
   return state;
   // return imu_odom->getState();
 }
@@ -38,7 +40,7 @@ double button_forward = 0;
 
 namespace drivetoposition {
 
-Target::Target(QLength x, QLength y, QAngle theta, bool hold) : x(x), y(y), theta(theta), hold(hold) {}
+Target::Target(bool is_fwd, QLength x, QLength y, QAngle theta, bool hold, bool is_turn) : x(x), y(y), theta(theta), hold(hold), is_turn(is_turn), is_fwd(is_fwd) {}
 
 void Target::init_if_new() {
   if (is_new) {
@@ -108,11 +110,12 @@ void update() {
     target_distance_reached = true;
   }
 
-  if (abs(get_odom_state().theta - target_state.theta) < 2.5_deg) {
+  double theta_error = fmod((target.theta - get_odom_state().theta).convert(degree) - 180, 360) - 180;
+  if (fabs(theta_error) < 2.5) {
     target_heading_reached = true;
   }
 
-  if (target_heading_reached && target_distance_reached) {
+  if ((target_heading_reached && target.is_turn) || (target_distance_reached && !target.is_turn)) {
     if (!targets.empty()) {
       target_heading_reached = false;
       target_distance_reached = false;
@@ -124,61 +127,76 @@ void update() {
   } 
   
   if (target_distance_reached && target.hold) {
-    move_speed = std::min(100.0, 5 * distance_to_target.convert(inch));
+    // move_speed = std::min(100.0, 5 * distance_to_target.convert(inch));
+    move_speed = 0;
   } else {
     move_speed = rampMath(distance_traveled.convert(inch), total_distance.convert(inch), move_settings);
   }
 
+
   if (target_heading_reached && target.hold) {
-    turn_speed = std::min(100.0, 100 * (target.theta - get_odom_state().theta).convert(radian));
+    turn_speed = 0.3 * theta_error;
   } else {
-    turn_speed = std::min(100.0, 100 * (target.theta - get_odom_state().theta).convert(radian));
+    turn_speed = 0.3 * theta_error;
   }
 
-  forward = move_speed * cos(direction.convert(radian));
-  strafe  = move_speed * sin(direction.convert(radian));
-  turn    = turn_speed;
+  turn = std::max(-100.0, std::min(100.0, turn_speed));
+  if (target.is_turn) {
+    forward = 0;
+    strafe = 0;
+  } else {
+    turn = 0;
+    // controllermenu::master_print_array[2] = "d " + std::to_string(direction.convert(degree));
+    forward = 20 * (target.is_fwd*2-1);
+    // forward = move_speed * cos(direction.convert(radian));
+    // forward = move_speed;
+    // strafe  = move_speed * sin(direction.convert(radian));
+  }
   controllermenu::master_print_array[1] = "d " + std::to_string(int(direction.convert(degree))) + " tdr " + std::to_string(int(target_distance_reached)) + " thr " + std::to_string(int(target_heading_reached));
   controllermenu::master_print_array[2] = "f " + std::to_string(int(forward)) + " t " + std::to_string(int(turn)) + " s " + std::to_string(int(strafe));
 }
 
-void add_target(QLength x, QLength y, QAngle theta, QLength offset_distance, QAngle offset_angle, bool hold = true) {
+void add_target(bool is_fwd, QLength x, QLength y, QAngle theta, QLength offset_distance, QAngle offset_angle, bool hold = true, bool is_turn = false) {
   QLength x_offset = cos(offset_angle) * offset_distance;
   QLength y_offset = sin(offset_angle) * offset_distance;
   final_target_reached = false;
-  target_queue.push({x - x_offset, y - y_offset, theta, hold});
+  target_queue.push({is_fwd, x - x_offset, y - y_offset, theta, hold, is_turn});
 }
 
-void add_target(QLength x, QLength y, QAngle theta, QLength offset_distance, bool hold = true) {
-  add_target(x, y, theta, offset_distance, theta, hold);
+void add_target(bool is_fwd, QLength x, QLength y, QAngle theta, QLength offset_distance, bool hold = true) {
+  add_target(is_fwd, x, y, theta, offset_distance, theta, hold);
 }
 
-void add_target(QLength x, QLength y, QAngle theta, bool hold = true) {
-  add_target(x, y, theta, 0_in, hold);
+void add_target(bool is_fwd, QLength x, QLength y, QAngle theta, bool hold = true) {
+  add_target(is_fwd, x, y, theta, 0_in, hold);
 }
 
-void add_target(odomutilities::Goal goal, QAngle theta, QLength offset_distance, QAngle offset_angle, bool hold = true) {
-  add_target(goal.point.x, goal.point.y, theta, offset_distance, offset_angle, hold);
+void add_target(bool is_fwd, odomutilities::Goal goal, QAngle theta, QLength offset_distance, QAngle offset_angle, bool hold = true) {
+  add_target(is_fwd, goal.point.x, goal.point.y, theta, offset_distance, offset_angle, hold);
 }
 
-void add_target(odomutilities::Goal goal, QAngle theta, QLength offset_distance, bool hold = true) {
-  add_target(goal, theta, offset_distance, theta, hold);
+void add_target(bool is_fwd, odomutilities::Goal goal, QAngle theta, QLength offset_distance, bool hold = true) {
+  add_target(is_fwd, goal, theta, offset_distance, theta, hold);
 }
 
-void add_target(odomutilities::Goal goal, QAngle theta, bool hold = true) {
-  add_target(goal, theta, 0_in, hold);
+void add_target(bool is_fwd, odomutilities::Goal goal, QAngle theta, bool hold = true) {
+  add_target(is_fwd, goal, theta, 0_in, hold);
 }
 
-void add_target(Point point, QAngle theta, QLength offset_distance, QAngle offset_angle, bool hold = true) {
-  add_target(point.x, point.y, theta, offset_distance, offset_angle, hold);
+void add_target(bool is_fwd, Point point, QAngle theta, QLength offset_distance, QAngle offset_angle, bool hold = true) {
+  add_target(is_fwd, point.x, point.y, theta, offset_distance, offset_angle, hold);
 }
 
-void add_target(Point point, QAngle theta, QLength offset_distance, bool hold = true) {
-  add_target(point, theta, offset_distance, theta, hold);
+void add_target(bool is_fwd, Point point, QAngle theta, QLength offset_distance, bool hold = true) {
+  add_target(is_fwd, point, theta, offset_distance, theta, hold);
 }
 
-void add_target(Point point, QAngle theta, bool hold = true) {
-  add_target(point, theta, 0_in, hold);
+void add_target(bool is_fwd, Point point, QAngle theta, bool hold = true) {
+  add_target(is_fwd, point, theta, 0_in, hold);
+}
+
+void add_target(QAngle theta, bool hold = true) {
+  add_target(true, 0_in, 0_in, theta, 0_in, 0_deg, hold, true);
 }
 
 void clear_all_targets() {
@@ -223,8 +241,9 @@ void motor_task()
     // controllermenu::master_print_array[2] = std::to_string(stick_turn);
     std::string x_str = std::to_string(int(get_odom_state().x.convert(inch)*100));
     std::string y_str = std::to_string(int(get_odom_state().y.convert(inch)*100));
-    std::string theta_str = std::to_string(int(get_odom_state().theta.convert(degree)*100));
-    // controllermenu::master_print_array[1] = "x " + x_str + " y " + y_str + " t " + theta_str;
+    std::string theta_str = std::to_string(get_odom_state().theta.convert(degree));
+    // controllermenu::master_print_array[1] = "x " + x_str + " y " + y_str;
+    // controllermenu::master_print_array[2] = "t " + theta_str;
 
     double forward = button_forward + drivetoposition::forward + stick_forward * 0.787401574803;
     // double strafe  = button_strafe + drivetoposition::strafe;
@@ -394,8 +413,9 @@ void auton_init(OdomState odom_state, std::string name = "unnamed", bool is_skil
   }
   auto x     = odom_state.x.convert(meter) * flip;
   auto y     = odom_state.y.convert(meter) * flip;
-  auto theta = (odom_state.theta - theta_offset).convert(degree);
+  auto theta = fmod((odom_state.theta - theta_offset).convert(degree), 360);
   gps.set_position(x, y, theta);
+  imu.set_heading(theta);
   start_time = pros::millis();
   auton_drive_enabled = true;
   (pros::Task(auton_log));
@@ -418,16 +438,28 @@ Macro none([](){},[](){});
 
 Macro test(
     [](){
-      auton_init({13.491_in, 34.9911_in, 270_deg});
+      auton_init({0_in, 0_in, 0_deg});
 
       move_settings.start_output = 100;
       move_settings.end_output = 20;
 
-      add_target(18_in, 34.9911_in, 270_deg);
+      // add_target(90_deg);
+      add_target(true, 20_in, 0_in, 360_deg);
+      wait_until_final_target_reached();
+      wait(1000);
+      add_target(false, 10_in, 0_in, 360_deg);
+      wait_until_final_target_reached();
+      wait(1000);
+      add_target(false, 0_in, 0_in, 360_deg);
+      // add_target(90_deg);
+      // add_target(360_deg);
+      // add_target(270_deg);
+      // add_target(360_deg);
+      // add_target(0_in, 10_in, 90_deg);
       // add_target(goal_1, -135_deg, 25_in);
       // add_target(goal_1, -135_deg, 30_in);
       // add_target(goal_1, 0_deg, 30_in, -135_deg);
-      add_target(13.491_in, 34.9911_in, 0_deg);
+      // add_target(13.491_in, 34.9911_in, 0_deg);
 
       wait_until_final_target_reached();
     },
@@ -438,19 +470,26 @@ Macro test(
 
 Macro blue_wp(
     [](){
-      auton_init({40_in, 60_in, 270_deg});
+      auton_init({57_in, 32_in, 314_deg});
 
       move_settings.start_output = 100;
       move_settings.end_output = 20;
 
-      add_target(40_in, 60_in, 315_deg);
-      add_target(40_in, 60_in, 315_deg, -16_in);
-      // add_target(45_in, 55_in, 0_deg);
-      // add_target(36_in, 60_in, 0_deg);
-      // add_target(goal_1, -135_deg, 25_in);
-      // add_target(goal_1, -135_deg, 30_in);
-      // add_target(goal_1, 0_deg, 30_in, -135_deg);
-      // add_target(13.491_in, 34.9911_in, 0_deg);
+      // add_target(315_deg);
+      lift_motor.move_absolute(500, 50);
+      add_target(true, 57_in, 32_in, 315_deg, -16_in);
+      wait_until_final_target_reached();
+      // lift_gripper.set_value(1);
+      lift_motor.move_absolute(380, 50);
+      wait(500);
+      lift_gripper.set_value(0);
+      wait(200);
+      add_target(true, 57_in, 32_in, 315_deg, -10_in);
+      wait(500);
+      lift_motor.move_absolute(10, 50);
+      add_target(true, 57_in, 32_in, 315_deg, -16_in);
+      wait_until_final_target_reached();
+      lift_gripper.set_value(1);
 
       wait_until_final_target_reached();
     },

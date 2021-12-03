@@ -22,13 +22,16 @@ namespace drivetoposition {
 
 class Target {
  public:
-  Target(QLength x, QLength y, QAngle theta, bool hold = true);
+  Target(bool is_fwd, QLength x, QLength y, QAngle theta, bool hold = true, bool is_turn = true);
 
+
+  bool is_fwd;
   QLength x = 0_in;
   QLength y = 0_in;
   QAngle theta = 0_deg;
   OdomState starting_state;
   bool hold;
+  bool is_turn;
   int millis_at_start;
 
   bool is_new = true;

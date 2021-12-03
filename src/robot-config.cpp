@@ -21,7 +21,7 @@ pros::ADIDigitalOut lift_gripper('a');
 
 pros::Motor ring_motor(11, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_DEGREES);
 
-pros::Gps gps(12, 0.7, 0.7);
+pros::Gps gps(12, 0.07, 0.07);
 pros::IMU imu(13);
 
 // okapi::Motor drive_fl (9, false, AbstractMotor::gearset::green, AbstractMotor::encoderUnits::degrees);
