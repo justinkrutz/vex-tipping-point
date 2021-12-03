@@ -52,17 +52,9 @@ void set_callbacks();
 namespace autonroutines {
 
 extern controllerbuttons::Macro none;
-extern controllerbuttons::Macro home_row_three;
-extern controllerbuttons::Macro home_row_three_old;
-extern controllerbuttons::Macro home_row_two;
-extern controllerbuttons::Macro left_shawnton;
-extern controllerbuttons::Macro right_shawnton;
 extern controllerbuttons::Macro test;
-extern controllerbuttons::Macro skills_one;
-extern controllerbuttons::Macro skills_one_one;
-extern controllerbuttons::Macro skills_two;
-extern controllerbuttons::Macro shawnton_three;
-extern controllerbuttons::Macro shawnton_cycle;
+extern controllerbuttons::Macro blue_wp;
+extern controllerbuttons::Macro red_wp;
 
 } // namespace autonroutines
 

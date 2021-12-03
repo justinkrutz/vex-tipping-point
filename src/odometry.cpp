@@ -12,10 +12,10 @@
 std::shared_ptr<ImuOdom> imu_odom;
 
 void odom_init() {
-  imu_odom = std::make_shared<ImuOdom>(TimeUtilFactory().createDefault(),
-      chassis->getOdometry()->getModel(),
-      chassis->getOdometry()->getScales());
-  pros::Task([&](){ imu_odom->loop(); });
+  // imu_odom = std::make_shared<ImuOdom>(TimeUtilFactory().createDefault(),
+  //     chassis->getOdometry()->getModel(),
+  //     chassis->getOdometry()->getScales());
+  // pros::Task([&](){ imu_odom->loop(); });
 }
 
 ImuOdom::ImuOdom(const TimeUtil &itimeUtil,

@@ -23,6 +23,7 @@ extern pros::ADIDigitalOut lift_gripper;
 
 extern pros::Motor ring_motor;
 
+extern pros::Gps gps;
 extern pros::IMU imu;
 
 // extern okapi::Motor drive_fl (9, false, AbstractMotor::gearset::green, AbstractMotor::encoderUnits::degrees);

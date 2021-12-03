@@ -17,8 +17,19 @@ namespace autondrive {
 controllerbuttons::MacroGroup auton_group;
 controllerbuttons::MacroGroup drive_group;
 
+bool is_blue = true;
+
 OdomState get_odom_state() {
-  return imu_odom->getState();
+  auto pos = gps.get_status();
+  int flip = 1;
+  QAngle theta_offset = 180_deg;
+  if (!is_blue){
+    flip = -1;
+    theta_offset = 0_deg;
+  }
+  OdomState state({pos.x*1_m*flip, pos.y*1_m*flip, pos.yaw*1_deg - theta_offset});
+  return state;
+  // return imu_odom->getState();
 }
 
 double button_strafe = 0;
@@ -39,7 +50,7 @@ void Target::init_if_new() {
 std::queue<Target> targets;
 std::queue<Target> target_queue;
 
-bool auton_drive_enabled = true;
+bool auton_drive_enabled = false;
 bool targets_should_clear = true;
 bool final_target_reached = true;
 bool target_heading_reached = false;
@@ -127,6 +138,8 @@ void update() {
   forward = move_speed * cos(direction.convert(radian));
   strafe  = move_speed * sin(direction.convert(radian));
   turn    = turn_speed;
+  controllermenu::master_print_array[1] = "d " + std::to_string(int(direction.convert(degree))) + " tdr " + std::to_string(int(target_distance_reached)) + " thr " + std::to_string(int(target_heading_reached));
+  controllermenu::master_print_array[2] = "f " + std::to_string(int(forward)) + " t " + std::to_string(int(turn)) + " s " + std::to_string(int(strafe));
 }
 
 void add_target(QLength x, QLength y, QAngle theta, QLength offset_distance, QAngle offset_angle, bool hold = true) {
@@ -187,7 +200,7 @@ void wait_until_final_target_reached() {
 
 void motor_task()
 {
- std::shared_ptr<ChassisModel> model = chassis->getModel();
+//  std::shared_ptr<ChassisModel> model = chassis->getModel();
   // std::shared_ptr<AbstractMotor> drive_left = chassis->getTopLeftMotor();
   // std::shared_ptr<AbstractMotor> drive_left = chassis->getTopLeftMotor();
   // std::shared_ptr<AbstractMotor> drive_fr = x_model->getTopRightMotor();
@@ -202,12 +215,16 @@ void motor_task()
 
   while(1)
   {
-    // drivetoposition::update();
+    drivetoposition::update();
     
     int stick_forward = master.get_analog(ANALOG_RIGHT_Y);
     int stick_turn = master.get_analog(ANALOG_RIGHT_X);
-    controllermenu::master_print_array[1] = std::to_string(stick_forward);
-    controllermenu::master_print_array[2] = std::to_string(stick_turn);
+    // controllermenu::master_print_array[1] = std::to_string(stick_forward);
+    // controllermenu::master_print_array[2] = std::to_string(stick_turn);
+    std::string x_str = std::to_string(int(get_odom_state().x.convert(inch)*100));
+    std::string y_str = std::to_string(int(get_odom_state().y.convert(inch)*100));
+    std::string theta_str = std::to_string(int(get_odom_state().theta.convert(degree)*100));
+    // controllermenu::master_print_array[1] = "x " + x_str + " y " + y_str + " t " + theta_str;
 
     double forward = button_forward + drivetoposition::forward + stick_forward * 0.787401574803;
     // double strafe  = button_strafe + drivetoposition::strafe;
@@ -235,15 +252,26 @@ void motor_task()
     // skid_model->getRightSideMotor()->moveVoltage(stick_forward - stick_turn);
     // skid_model->arcade(stick_forward, stick_turn);
 
-
-    double left_drive = stick_forward + stick_turn;
-    double right_drive = stick_forward - stick_turn;
-    left_front   = left_drive;
-    left_middle  = left_drive;
-    left_back    = left_drive;
-    right_front  = right_drive;
-    right_middle = right_drive;
-    right_back   = right_drive;
+    if (drivetoposition::auton_drive_enabled) {
+      // controllermenu::master_print_array[2] = "auton_drive_enabled";
+      double left_drive  = 6 * (forward + turn);
+      double right_drive = 6 * (forward - turn);
+      left_front.  move_velocity(left_drive);
+      left_middle. move_velocity(left_drive);
+      left_back.   move_velocity(left_drive);
+      right_front. move_velocity(right_drive);
+      right_middle.move_velocity(right_drive);
+      right_back.  move_velocity(right_drive);
+    } else {
+      double left_drive  = stick_forward + stick_turn;
+      double right_drive = stick_forward - stick_turn;
+      left_front   = left_drive;
+      left_middle  = left_drive;
+      left_back    = left_drive;
+      right_front  = right_drive;
+      right_middle = right_drive;
+      right_back   = right_drive;
+    }
 
     pros::delay(5);
   }
@@ -358,6 +386,16 @@ void auton_log() {
 
 void auton_init(OdomState odom_state, std::string name = "unnamed", bool is_skills = false) {
   // imu_odom->setState(odom_state);
+  int flip = 1;
+  QAngle theta_offset = 180_deg;
+  if (!is_blue){
+    flip = -1;
+    theta_offset = 0_deg;
+  }
+  auto x     = odom_state.x.convert(meter) * flip;
+  auto y     = odom_state.y.convert(meter) * flip;
+  auto theta = (odom_state.theta - theta_offset).convert(degree);
+  gps.set_position(x, y, theta);
   start_time = pros::millis();
   auton_drive_enabled = true;
   (pros::Task(auton_log));
@@ -365,7 +403,7 @@ void auton_init(OdomState odom_state, std::string name = "unnamed", bool is_skil
 
 void auton_clean_up() {
   clear_all_targets();
-  // auton_drive_enabled = false;
+  auton_drive_enabled = false;
   // stow_after_eject = false;
   // button_strafe = 0;
   button_turn = 0;
@@ -380,18 +418,49 @@ Macro none([](){},[](){});
 
 Macro test(
     [](){
-      auton_init({13.491_in, 34.9911_in, 0_deg});
+      auton_init({13.491_in, 34.9911_in, 270_deg});
 
       move_settings.start_output = 100;
       move_settings.end_output = 20;
 
-      add_target(18_in, 34.9911_in, 0_deg);
+      add_target(18_in, 34.9911_in, 270_deg);
       // add_target(goal_1, -135_deg, 25_in);
       // add_target(goal_1, -135_deg, 30_in);
       // add_target(goal_1, 0_deg, 30_in, -135_deg);
       add_target(13.491_in, 34.9911_in, 0_deg);
 
       wait_until_final_target_reached();
+    },
+    [](){
+      auton_clean_up();
+    },
+    {&auton_group});
+
+Macro blue_wp(
+    [](){
+      auton_init({40_in, 60_in, 270_deg});
+
+      move_settings.start_output = 100;
+      move_settings.end_output = 20;
+
+      add_target(40_in, 60_in, 315_deg);
+      add_target(40_in, 60_in, 315_deg, -16_in);
+      // add_target(45_in, 55_in, 0_deg);
+      // add_target(36_in, 60_in, 0_deg);
+      // add_target(goal_1, -135_deg, 25_in);
+      // add_target(goal_1, -135_deg, 30_in);
+      // add_target(goal_1, 0_deg, 30_in, -135_deg);
+      // add_target(13.491_in, 34.9911_in, 0_deg);
+
+      wait_until_final_target_reached();
+    },
+    [](){
+      auton_clean_up();
+    },
+    {&auton_group});
+
+Macro red_wp(
+    [](){
     },
     [](){
       auton_clean_up();
