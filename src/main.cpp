@@ -142,6 +142,7 @@ void opcontrol() {
       // controllermenu::partner_print_array[0] = std::to_string(optical_sensor.get_raw().clear) + " " + std::to_string(optical_sensor.get_proximity());
       // controllermenu::partner_print_array[1] = std::to_string(optical_sensor.get_rgb().brightness);
       // controllermenu::partner_print_array[2] = std::to_string(optical_sensor.get_hue()) + " " + std::to_string(optical_sensor.get_saturation());
+      controllermenu::master_print_array[1] = std::to_string(imu.get_rotation());
     }
     pros::delay(10);
   }

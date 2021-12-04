@@ -55,7 +55,7 @@ namespace autonroutines {
 extern controllerbuttons::Macro none;
 extern controllerbuttons::Macro test;
 extern controllerbuttons::Macro blue_wp;
-extern controllerbuttons::Macro red_wp;
+extern controllerbuttons::Macro one_side;
 
 } // namespace autonroutines
 

@@ -21,14 +21,14 @@ bool is_blue = true;
 
 OdomState get_odom_state() {
   auto pos = gps.get_status();
-  auto theta = imu.get_heading();
+  auto theta = imu.get_rotation();
   int flip = 1;
   double theta_offset = 180;
   if (!is_blue){
     flip = -1;
     theta_offset = 0;
   }
-  OdomState state({pos.x*1_m*flip, pos.y*1_m*flip, fmod(theta, 360)*1_deg});
+  OdomState state({pos.x*1_m*flip, pos.y*1_m*flip, theta*1_deg});
   // OdomState state({pos.x*1_m*flip, pos.y*1_m*flip, fmod(pos.yaw - theta_offset, 360)*1_deg});
   return state;
   // return imu_odom->getState();
@@ -116,7 +116,7 @@ void update() {
     target_distance_reached = true;
   }
 
-  double theta_error = fmod((target.theta - get_odom_state().theta).convert(degree) - 180, 360) - 180;
+  double theta_error = (target.theta - get_odom_state().theta).convert(degree);
   if (fabs(theta_error) < 2.5) {
     target_heading_reached = true;
   }
@@ -141,9 +141,9 @@ void update() {
 
 
   if (target_heading_reached && target.hold) {
-    turn_speed = 0.3 * theta_error;
+    turn_speed = 0.5 * theta_error;
   } else {
-    turn_speed = 0.3 * theta_error;
+    turn_speed = 0.5 * theta_error;
   }
 
   turn = std::max(-100.0, std::min(100.0, turn_speed));
@@ -159,8 +159,8 @@ void update() {
     // forward = move_speed;
     // strafe  = move_speed * sin(direction.convert(radian));
   }
-  controllermenu::master_print_array[1] = "d " + std::to_string(int(direction.convert(degree))) + " tdr " + std::to_string(int(target_distance_reached)) + " thr " + std::to_string(int(target_heading_reached));
-  controllermenu::master_print_array[2] = "f " + std::to_string(int(forward)) + " t " + std::to_string(int(turn)) + " s " + std::to_string(int(strafe));
+  // controllermenu::master_print_array[1] = "d " + std::to_string(int(direction.convert(degree))) + " tdr " + std::to_string(int(target_distance_reached)) + " thr " + std::to_string(int(target_heading_reached));
+  // controllermenu::master_print_array[2] = "f " + std::to_string(int(forward)) + " t " + std::to_string(int(turn)) + " s " + std::to_string(int(strafe));
 }
 
 void add_target(QLength x, QLength y, QAngle theta, QLength offset_distance, QAngle offset_angle, bool hold = true, bool is_turn = false) {
@@ -412,9 +412,9 @@ void auton_init(OdomState odom_state, std::string name = "unnamed", bool is_skil
   }
   auto x     = odom_state.x.convert(meter) * flip;
   auto y     = odom_state.y.convert(meter) * flip;
-  auto theta = fmod((odom_state.theta - theta_offset).convert(degree), 360);
+  auto theta = odom_state.theta.convert(degree);
   gps.set_position(x, y, theta);
-  imu.set_heading(theta);
+  imu.set_rotation(theta);
   start_time = pros::millis();
   auton_drive_enabled = true;
   (pros::Task(auton_log));
@@ -470,36 +470,47 @@ Macro test(
 
 Macro blue_wp(
     [](){
-      auton_init({57_in, 32_in, 314_deg});
+      auton_init({57_in, 32_in, -45_deg});
 
       move_settings.start_output = 20;
+      move_settings.mid_output = 100;
       move_settings.end_output = 20;
 
       // add_target(315_deg);
       lift_motor.move_absolute(230, 100);
-      wait(1000);
-      add_target(17_in, 315_deg);
+      wait(700);
+      add_target(17_in, -45_deg);
       wait_until_final_target_reached();
       wait(500);
       lift_gripper.set_value(0);
       wait(200);
-      add_target(-6_in, 315_deg);
+      add_target(-6_in, -45_deg);
       wait(500);
       lift_motor.move_absolute(10, 100);
-      wait(1000);
-      add_target(8_in, 315_deg);
+      wait(300);
+      add_target(8_in, -45_deg);
       wait_until_final_target_reached();
       wait(500);
       lift_gripper.set_value(1);
       wait(500);
       lift_motor.move_absolute(50, 100);
-      add_target(360_deg);
-      add_target(-78_in, 360_deg);
-      add_target(-290_deg);
-      add_target(-8_in, -290_deg);
+      add_target(30_deg);
+      add_target(-12_in, 30_deg);
+      add_target(0_deg);
+      add_target(-74_in, 0_deg);
+      add_target(-90_deg);
       wait_until_final_target_reached();
-      ring_motor.move_velocity(300);
-      wait(1500);
+      move_settings.mid_output = 50;
+      add_target(-18_in, -90_deg);
+      wait_until_final_target_reached();
+      add_target(-115_deg);
+      // move_settings.start_output = 15;
+      // move_settings.mid_output = 15;
+      // move_settings.end_output = 15;
+      // add_target(-3_in, -125_deg);
+      wait(500);
+      ring_motor.move_velocity(400);
+      wait(3000);
       ring_motor.move_velocity(0);
 
       wait_until_final_target_reached();
@@ -509,8 +520,37 @@ Macro blue_wp(
     },
     {&auton_group});
 
-Macro red_wp(
+Macro one_side(
     [](){
+      auton_init({57_in, 32_in, -45_deg});
+
+      move_settings.start_output = 20;
+      move_settings.mid_output = 100;
+      move_settings.end_output = 20;
+
+      // add_target(315_deg);
+      lift_motor.move_absolute(230, 100);
+      wait(700);
+      add_target(17_in, -45_deg);
+      wait_until_final_target_reached();
+      wait(1000);
+      lift_gripper.set_value(0);
+      wait(200);
+      add_target(-6_in, -45_deg);
+      wait(500);
+      lift_motor.move_absolute(10, 100);
+      wait(1000);
+      add_target(8_in, -45_deg);
+      wait_until_final_target_reached();
+      wait(500);
+      lift_gripper.set_value(1);
+      wait(500);
+      lift_motor.move_absolute(50, 100);
+      add_target(-8_in, -45_deg);
+      ring_motor.move_velocity(0);
+
+      wait_until_final_target_reached();
+
     },
     [](){
       auton_clean_up();

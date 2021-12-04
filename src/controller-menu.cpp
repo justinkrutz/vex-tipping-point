@@ -307,8 +307,8 @@ MenuAutonomous &selected_auton = default_auton;
 
 void create_folder_structure() {
   root_folder = new MenuFolder("", {
-      new MenuAutonomous("Blue WP", autonroutines::blue_wp),
-      new MenuAutonomous("Red WP", autonroutines::red_wp),
+      new MenuAutonomous("Both Sides", autonroutines::blue_wp),
+      new MenuAutonomous("One Side", autonroutines::one_side),
       new MenuAutonomous("None", autonroutines::none),
       new MenuAutonomous("Test", autonroutines::test),
     // new MenuAutonomous("Home Row Three", autonroutines::home_row_three),
