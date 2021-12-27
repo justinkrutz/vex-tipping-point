@@ -56,6 +56,8 @@ extern controllerbuttons::Macro none;
 extern controllerbuttons::Macro test;
 extern controllerbuttons::Macro blue_wp;
 extern controllerbuttons::Macro one_side;
+extern controllerbuttons::Macro point_and_shoot;
+extern controllerbuttons::Macro point_and_plus;
 
 } // namespace autonroutines
 

@@ -20,6 +20,7 @@ extern pros::Motor lift_motor;
 extern pros::Rotation lift_sensor;
 
 extern pros::ADIDigitalOut lift_gripper;
+extern pros::ADIDigitalOut back_tilter;
 
 extern pros::Motor ring_motor;
 

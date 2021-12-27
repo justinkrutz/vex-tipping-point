@@ -427,9 +427,9 @@ void auton_clean_up() {
   // button_strafe = 0;
   button_turn = 0;
   button_forward = 0;
-  controllermenu::master_print_array[0] = "Completed";
-  controllermenu::master_print_array[1] = "Time: " + std::to_string(pros::millis() - start_time);
-  controllermenu::master_print_array[2] = "";
+  // controllermenu::master_print_array[0] = "Completed";
+  // controllermenu::master_print_array[1] = "Time: " + std::to_string(pros::millis() - start_time);
+  // controllermenu::master_print_array[2] = "";
 }
 
 Macro none([](){},[](){});
@@ -549,6 +549,77 @@ Macro one_side(
       add_target(-8_in, -45_deg);
       ring_motor.move_velocity(0);
 
+      wait_until_final_target_reached();
+
+    },
+    [](){
+      auton_clean_up();
+    },
+    {&auton_group});
+
+Macro point_and_shoot(
+    [](){
+      auton_init({57_in, 32_in, 0_deg});
+
+      move_settings.start_output = 20;
+      move_settings.mid_output = 100;
+      move_settings.end_output = 20;
+
+      lift_gripper.set_value(0);
+      lift_motor.move_absolute(10, 100);
+      // add_target(315_deg);
+      // lift_motor.move_absolute(230, 100);
+      // wait(700);
+      add_target(44_in, 0_deg);
+      wait_until_final_target_reached();
+      wait(200);
+      lift_gripper.set_value(1);
+      // wait(500);
+      // wait(200);
+      // add_target(-6_in, 0_deg);
+      // wait(500);
+      // wait(1000);
+      add_target(-44_in, 0_deg);
+      wait_until_final_target_reached();
+
+    },
+    [](){
+      auton_clean_up();
+    },
+    {&auton_group});
+
+Macro point_and_plus(
+    [](){
+      auton_init({57_in, 32_in, 0_deg});
+
+      move_settings.start_output = 20;
+      move_settings.mid_output = 100;
+      move_settings.end_output = 20;
+
+      lift_gripper.set_value(0);
+      lift_motor.move_absolute(10, 100);
+      // add_target(315_deg);
+      // lift_motor.move_absolute(230, 100);
+      // wait(700);
+      add_target(44_in, 0_deg);
+      wait_until_final_target_reached();
+      wait(50);
+      lift_gripper.set_value(1);
+      // wait(500);
+      // wait(200);
+      // add_target(-6_in, 0_deg);
+      // wait(500);
+      // wait(1000);
+      add_target(-44_in, 0_deg);
+      add_target(-85_deg);
+      add_target(-6_in, -85_deg);
+      wait_until_final_target_reached();
+      wait(500);
+      // lift_motor.move_absolute(50, 100);
+      // add_target(-8_in, 0_deg);
+      ring_motor.move_velocity(400);
+      wait(6000);
+      ring_motor.move_velocity(0);
       wait_until_final_target_reached();
 
     },

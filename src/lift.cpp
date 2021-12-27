@@ -76,6 +76,29 @@ void init() {
 
 }
 
+class Piston {
+ public:
+  Piston(pros::ADIDigitalOut& piston, bool is_double = false) : piston(piston), is_double(is_double) {}
+  static int piston_cycles;
+  void toggle() {
+    if (is_double) {
+      piston_cycles++;
+    } else if (!piston_out) {
+      piston_cycles++;
+    }
+    piston_out = !piston_out;
+    piston.set_value(piston_out);
+    print();
+  }
+  void print() {
+    controllermenu::master_print_array[0] = std::to_string(piston_cycles);
+  }
+  bool piston_out = false;
+  bool is_double;
+  pros::ADIDigitalOut& piston;
+};
+int Piston::piston_cycles = 0;
+
 void toggle_grabber() {
   if (!piston_out) {
     lift_gripper.set_value(1);
@@ -92,9 +115,14 @@ void toggle_grabber() {
   }
 }
 
+Piston claw(lift_gripper);
+Piston tilter(back_tilter);
+
 void set_callbacks() {
   using namespace controllerbuttons;
-  button_handler.master.r1.pressed.set(toggle_grabber);
+  // button_handler.master.r1.pressed.set(toggle_grabber);
+  button_handler.master.r1.pressed .set([&](){ claw.toggle(); });
+  button_handler.master.r2.pressed .set([&](){ tilter.toggle(); });
   // button_handler.master.r2.pressed.set_macro();
 
   button_handler.master.b .pressed .set([&](){ ring_motor = 127; });
@@ -102,10 +130,10 @@ void set_callbacks() {
   button_handler.master.x .pressed .set([&](){ ring_motor = -127; });
   button_handler.master.x .released.set([&](){ ring_motor = 0; });
 
-  button_handler.master.l1.pressed .set([&](){ lift_motor = 127; });
-  button_handler.master.l1.released.set([&](){ lift_motor = 0; });
-  button_handler.master.l2.pressed .set([&](){ lift_motor = -127; });
+  button_handler.master.l2.pressed .set([&](){ lift_motor = 127; });
   button_handler.master.l2.released.set([&](){ lift_motor = 0; });
+  button_handler.master.l1.pressed .set([&](){ lift_motor = -127; });
+  button_handler.master.l1.released.set([&](){ lift_motor = 0; });
 }
 
 } // namespace lift
