@@ -115,8 +115,36 @@ void toggle_grabber() {
   }
 }
 
+class Motor_toggle {
+ public:
+  Motor_toggle(pros::Motor& motor) : motor(motor) {}
+
+  void toggle(bool is_forward = false) {
+    if (is_moving && was_forward == is_forward) {
+      motor = 0;
+      is_moving = false;
+    } else {
+      if (is_forward) {
+        motor = -127;
+        is_moving = true;
+        was_forward = true;
+      } else {
+        motor = 127;
+        is_moving = true;
+        was_forward = false;
+      }
+    }
+  }
+
+  pros::Motor& motor;
+  bool is_moving = false, was_forward = false;
+};
+
+
 Piston claw(lift_gripper);
 Piston tilter(back_tilter);
+
+Motor_toggle intake(ring_motor);
 
 void set_callbacks() {
   using namespace controllerbuttons;
@@ -125,15 +153,15 @@ void set_callbacks() {
   button_handler.master.r2.pressed .set([&](){ tilter.toggle(); });
   // button_handler.master.r2.pressed.set_macro();
 
-  button_handler.master.b .pressed .set([&](){ ring_motor = 127; });
-  button_handler.master.b .released.set([&](){ ring_motor = 0; });
-  button_handler.master.x .pressed .set([&](){ ring_motor = -127; });
-  button_handler.master.x .released.set([&](){ ring_motor = 0; });
+  button_handler.master.up  .pressed .set([&](){ intake.toggle(); });//ring_motor = 127;
+//  button_handler.master.up  .released.set([&](){ lift.toggle(true); });//ring_motor = 0;
+  button_handler.master.down.pressed .set([&](){ intake.toggle(true); });//ring_motor = -127;
+//  button_handler.master.down.released.set([&](){ lift.toggle(); });//ring_motor = 0;
 
-  button_handler.master.l2.pressed .set([&](){ lift_motor = 127; });
-  button_handler.master.l2.released.set([&](){ lift_motor = 0; });
-  button_handler.master.l1.pressed .set([&](){ lift_motor = -127; });
+  button_handler.master.l1.pressed .set([&](){ lift_motor = 127; });
   button_handler.master.l1.released.set([&](){ lift_motor = 0; });
+  button_handler.master.l2.pressed .set([&](){ lift_motor = -127; });
+  button_handler.master.l2.released.set([&](){ lift_motor = 0; });
 }
 
 } // namespace lift
