@@ -34,7 +34,7 @@ void set_drive_callbacks() {
  */
 
 void initialize() {
-  lift_gripper.set_value(1);
+  // lift_gripper.set_value(1);
   // build_chassis();
   // odom_init();
   // chassis->setState({13.491_in, 34.9911_in, 0_deg});
