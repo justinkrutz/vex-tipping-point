@@ -1,3 +1,4 @@
+#include "lift.h"
 #include "main.h"
 #include "robot-config.h"
 #include "controller-menu.h"
@@ -14,110 +15,44 @@ void init() {
 
   lift_motor.set_brake_mode(MOTOR_BRAKE_HOLD);
   lift_sensor.set_reversed(true);
-
-  // while (true) {
-    // if (!master.get_digital(DIGITAL_X) && !master.get_digital(DIGITAL_B)) {
-    //   ring_motor = master.get_analog(ANALOG_LEFT_Y);
-    // } else if (master.get_digital(DIGITAL_X)) {
-    //   ring_motor = 127;
-    // } else if (master.get_digital(DIGITAL_B)) {
-    //   ring_motor = -127;
-    // }
-    // if (!auto_lift) {
-    //   if (master.get_digital(DIGITAL_L1)) {
-    //     lift_motor = 127;
-    //   } else if (master.get_digital(DIGITAL_L2)) {
-    //     lift_motor = -127;
-    //   } else {
-    //     lift_motor = 0;
-    //     lift_motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-    //   }
-    // }
-    // if (auto_lift) {
-    //   if (master.get_digital_new_press(DIGITAL_L1)) {
-    //     // if (lift_position_index < sizeof(lift_position) - 1) {
-    //     if (lift_position_index < 2) {
-    //       lift_position_index++;
-    //       lift_motor.move_absolute(lift_position[lift_position_index], 127);
-    //     }
-    //   }
-    //   if (master.get_digital_new_press(DIGITAL_L2)) {
-    //     if (lift_position_index > 0) {
-    //       lift_position_index--;
-    //       lift_motor.move_absolute(lift_position[lift_position_index], 127);
-    //     }
-    //   }
-    // }
-
-    // if (joy_lift && !master.get_digital(DIGITAL_L1) && !master.get_digital(DIGITAL_L1)) {
-    //   lift_motor = master.get_analog(ANALOG_LEFT_Y);
-    // }
-
-    // if (master.get_digital_new_press(DIGITAL_DOWN)) {
-    //   auto_lift = !auto_lift;
-    // }
-
-    // if (master.get_digital_new_press(DIGITAL_R1)) {
-    //   if (!piston_out) {
-    //     lift_gripper.set_value(1);
-    //     piston_out = true;
-    //     piston_cycles++;
-    //     // master.clear_line(0);
-    //     // pros::delay(50);
-    //     // master.print(0, 0, "%d", piston_cycles);
-    //     controllermenu::master_print_array[0] = std::to_string(piston_cycles);
-
-    //   } else {
-    //     lift_gripper.set_value(0);
-    //     piston_out = false;
-    //   }
-    // }
-  // }
-
 }
 
-class Piston {
- public:
-  Piston(pros::ADIDigitalOut& piston, bool is_double = false) : piston(piston), is_double(is_double) {}
-  static int piston_cycles;
-  void toggle() {
-    if (is_double) {
-      piston_cycles++;
-    } else if (!piston_out) {
-      piston_cycles++;
-    }
-    piston_out = !piston_out;
-    piston.set_value(piston_out);
-    print();
+Piston::Piston(pros::ADIDigitalOut& piston, bool is_double) : piston(piston), is_double(is_double) {}
+  
+void Piston::extend() {
+  piston.set_value(true);
+  piston_cycles++;
+  print();
+}
+
+void Piston::retract() {
+  piston.set_value(false);
+  if (is_double) {
+    piston_cycles++;
   }
-  void print() {
-    controllermenu::master_print_array[0] = std::to_string(piston_cycles);
+  print();
+}
+
+void Piston::toggle() {
+  if (is_double) {
+    piston_cycles++;
+  } else if (!piston_out) {
+    piston_cycles++;
   }
-  bool piston_out = false;
-  bool is_double;
-  pros::ADIDigitalOut& piston;
-};
+  piston_out = !piston_out;
+  piston.set_value(piston_out);
+  print();
+}
+
+void Piston::print() {
+  controllermenu::master_print_array[0] = std::to_string(piston_cycles);
+}
+
 int Piston::piston_cycles = 0;
 
-void toggle_grabber() {
-  if (!piston_out) {
-    lift_gripper.set_value(1);
-    piston_out = true;
-    piston_cycles++;
-    // master.clear_line(0);
-    // pros::delay(50);
-    // master.print(0, 0, "%d", piston_cycles);
-    controllermenu::master_print_array[0] = std::to_string(piston_cycles);
-
-  } else {
-    lift_gripper.set_value(0);
-    piston_out = false;
-  }
-}
-
-class Motor_toggle {
+class MotorToggle {
  public:
-  Motor_toggle(pros::Motor& motor) : motor(motor) {}
+  MotorToggle(pros::Motor& motor) : motor(motor) {}
 
   void toggle(bool is_forward = false) {
     if (is_moving && was_forward == is_forward) {
@@ -144,7 +79,7 @@ class Motor_toggle {
 Piston claw(lift_gripper);
 Piston tilter(back_tilter);
 
-Motor_toggle intake(ring_motor);
+MotorToggle intake(ring_motor);
 
 void set_callbacks() {
   using namespace controllerbuttons;

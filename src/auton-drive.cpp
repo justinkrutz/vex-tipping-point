@@ -7,6 +7,7 @@
 #include "robot-functions.h"
 #include "auton-drive.h"
 #include "odom-utilities.h"
+#include "lift.h"
 #include <stdio.h>
 #include <complex.h>
 #include "odometry.h"
@@ -482,7 +483,7 @@ Macro blue_wp(
       add_target(17_in, -45_deg);
       wait_until_final_target_reached();
       wait(500);
-      lift_gripper.set_value(0);
+      lift::claw.retract();
       wait(200);
       add_target(-6_in, -45_deg);
       wait(500);
@@ -491,7 +492,7 @@ Macro blue_wp(
       add_target(8_in, -45_deg);
       wait_until_final_target_reached();
       wait(500);
-      lift_gripper.set_value(1);
+      lift::claw.extend();
       wait(500);
       lift_motor.move_absolute(50, 100);
       add_target(30_deg);
@@ -534,7 +535,7 @@ Macro one_side(
       add_target(17_in, -45_deg);
       wait_until_final_target_reached();
       wait(1000);
-      lift_gripper.set_value(0);
+      lift::claw.retract();
       wait(200);
       add_target(-6_in, -45_deg);
       wait(500);
@@ -543,7 +544,7 @@ Macro one_side(
       add_target(8_in, -45_deg);
       wait_until_final_target_reached();
       wait(500);
-      lift_gripper.set_value(1);
+      lift::claw.extend();
       wait(500);
       lift_motor.move_absolute(50, 100);
       add_target(-8_in, -45_deg);
@@ -565,7 +566,7 @@ Macro point_and_shoot(
       move_settings.mid_output = 100;
       move_settings.end_output = 20;
 
-      lift_gripper.set_value(0);
+      lift::claw.retract();
       lift_motor.move_absolute(10, 100);
       // add_target(315_deg);
       // lift_motor.move_absolute(230, 100);
@@ -573,7 +574,7 @@ Macro point_and_shoot(
       add_target(44_in, 0_deg);
       wait_until_final_target_reached();
       wait(200);
-      lift_gripper.set_value(1);
+      lift::claw.extend();
       // wait(500);
       // wait(200);
       // add_target(-6_in, 0_deg);
@@ -596,7 +597,7 @@ Macro point_and_plus(
       move_settings.mid_output = 100;
       move_settings.end_output = 20;
 
-      lift_gripper.set_value(0);
+      lift::claw.retract();
       lift_motor.move_absolute(10, 100);
       // add_target(315_deg);
       // lift_motor.move_absolute(230, 100);
@@ -604,7 +605,7 @@ Macro point_and_plus(
       add_target(44_in, 0_deg);
       wait_until_final_target_reached();
       wait(50);
-      lift_gripper.set_value(1);
+      lift::claw.extend();
       // wait(500);
       // wait(200);
       // add_target(-6_in, 0_deg);
