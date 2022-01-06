@@ -332,6 +332,20 @@ using namespace controllerbuttons;
 //     },
 //     {&drive_group});
 
+Macro pull_platform(
+    [](){
+      //auton_init({0_in, 0_in, 0_deg});
+      button_forward = -20;
+      lift_motor.move_absolute(0, 127);
+      while (!lift_motor.is_stopped()) {
+        pros::delay(1);
+      }
+      button_forward = 0;
+    },
+    [](){
+    },
+    {&auton_group});
+
 void drive_group_terminate() {
   drive_group.terminate();
   button_strafe = 0;
@@ -346,6 +360,7 @@ void set_callbacks() {
 //   button_handler.master.left.released.set(drive_group_terminate);
 //   button_handler.master.right.released.set(drive_group_terminate);
 //   // button_handler.master.right.pressed.set_macro(drivetoposition::ball_allign);
+button_handler.master.left.pressed.set_macro(pull_platform);
 }
 
 } // namespace autondrive
