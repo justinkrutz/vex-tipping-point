@@ -369,7 +369,7 @@ void set_callbacks() {
 //   button_handler.master.left.released.set(drive_group_terminate);
 //   button_handler.master.right.released.set(drive_group_terminate);
 //   // button_handler.master.right.pressed.set_macro(drivetoposition::ball_allign);
-button_handler.master.left.pressed.set_macro(pull_platform);
+  button_handler.master.left.pressed.set_macro(pull_platform);
 }
 
 } // namespace autondrive

@@ -46,7 +46,7 @@ void initialize() {
   // robotfunctions::set_callbacks();
   // ballsystem::set_callbacks();
   // ballsystem::init();
-  // autondrive::set_callbacks();
+  autondrive::set_callbacks();
   // odomutilities::load_autons_from_SD();
   lift::init();
   controllermenu::init();
