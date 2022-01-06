@@ -452,9 +452,9 @@ void auton_clean_up() {
   // button_strafe = 0;
   button_turn = 0;
   button_forward = 0;
-  // controllermenu::master_print_array[0] = "Completed";
-  // controllermenu::master_print_array[1] = "Time: " + std::to_string(pros::millis() - start_time);
-  // controllermenu::master_print_array[2] = "";
+  controllermenu::master_print_array[0] = "Completed";
+  controllermenu::master_print_array[1] = "Time: " + std::to_string(pros::millis() - start_time);
+  controllermenu::master_print_array[2] = "";
 }
 
 Macro none([](){},[](){});
@@ -517,35 +517,35 @@ Macro blue_wp(
       wait_until_final_target_reached();
       wait(500);
       lift::claw.extend();
-      wait(500);
+      wait(200);
       add_target(-3_in, -45_deg);
       lift_motor.move_absolute(50, 100);
       add_target(30_deg);
-      add_target(-15_in, 30_deg);
+      add_target(-18_in, 30_deg);
       add_target(0_deg);
-      add_target(-83_in, 0_deg);
-      add_target(-90_deg);
+      add_target(-76_in, 0_deg);
+      add_target(-100_deg);
       wait_until_final_target_reached();
       // move_settings.mid_output = 50;
-      add_target(-115_deg);
+      move_settings.mid_output = 40;
+      add_target(-122_deg);
       wait_until_final_target_reached();
       lift::tilter.retract();
-      wait(500);
-      move_settings.mid_output = 40;
-      add_target(-20_in, -115_deg);
+      // wait(500);
+      add_target(-20_in, -122_deg);
 
       wait_until_final_target_reached(1000);
       wait(500);
       lift::tilter.extend();
       wait(1000);
+      add_target(6_in, -122_deg);
       ring_motor.move_velocity(400);
-      wait(2000);
+      wait(1500);
       ring_motor.move_velocity(-400);
       wait(300);
       ring_motor.move_velocity(400);
       wait(500);
       ring_motor.move_velocity(0);
-      add_target(6_in, -115_deg);
 
       wait_until_final_target_reached();
     },
