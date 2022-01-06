@@ -49,6 +49,7 @@ void Target::init_if_new() {
     starting_state = get_odom_state();
     left_front.tare_position();
     right_front.tare_position();
+    millis_at_start = pros::millis();
   }
 }
 
@@ -211,6 +212,14 @@ void wait_until_final_target_reached() {
   while (!final_target_reached) {
     wait(10);
   }
+}
+
+void wait_until_final_target_reached(int timeout) {
+  int start_time = pros::millis();
+  while (!final_target_reached && pros::millis() - start_time < timeout) {
+    wait(10);
+  }
+  clear_all_targets();
 }
 
 } // namespace drivetoposition
@@ -504,30 +513,39 @@ Macro blue_wp(
       wait(500);
       lift_motor.move_absolute(10, 100);
       wait(300);
-      add_target(8_in, -45_deg);
+      add_target(6_in, -45_deg);
       wait_until_final_target_reached();
       wait(500);
       lift::claw.extend();
       wait(500);
+      add_target(-3_in, -45_deg);
       lift_motor.move_absolute(50, 100);
       add_target(30_deg);
-      add_target(-12_in, 30_deg);
+      add_target(-15_in, 30_deg);
       add_target(0_deg);
-      add_target(-74_in, 0_deg);
+      add_target(-83_in, 0_deg);
       add_target(-90_deg);
       wait_until_final_target_reached();
-      move_settings.mid_output = 50;
-      add_target(-105_deg);
-      wait_until_final_target_reached();
-      lift::tilter.extend();
-      wait(500);
-      add_target(-18_in, -90_deg);
+      // move_settings.mid_output = 50;
+      add_target(-115_deg);
       wait_until_final_target_reached();
       lift::tilter.retract();
-      wait(2000);
+      wait(500);
+      move_settings.mid_output = 40;
+      add_target(-20_in, -115_deg);
+
+      wait_until_final_target_reached(1000);
+      wait(500);
+      lift::tilter.extend();
+      wait(1000);
       ring_motor.move_velocity(400);
-      wait(3000);
+      wait(2000);
+      ring_motor.move_velocity(-400);
+      wait(300);
+      ring_motor.move_velocity(400);
+      wait(500);
       ring_motor.move_velocity(0);
+      add_target(6_in, -115_deg);
 
       wait_until_final_target_reached();
     },
@@ -609,6 +627,7 @@ Macro point_and_plus(
       add_target(42.5_in, 10_deg);
       wait_until_final_target_reached();
       lift::claw.extend();
+      lift_motor.move_absolute(10, 100);
       add_target(-23_in, 10_deg);
       add_target(45_deg);
       add_target(-12_in, 45_deg);
@@ -621,10 +640,15 @@ Macro point_and_plus(
       wait_until_final_target_reached();
       wait(500);
       lift::tilter.extend();
-      wait(2000);
+      wait(1000);
       ring_motor.move_velocity(400);
-      wait(6000);
+      wait(2000);
+      ring_motor.move_velocity(-400);
+      wait(300);
+      ring_motor.move_velocity(400);
+      wait(500);
       ring_motor.move_velocity(0);
+      add_target(6_in, -45_deg);
       wait_until_final_target_reached();
 
     },
