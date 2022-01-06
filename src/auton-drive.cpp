@@ -335,7 +335,7 @@ using namespace controllerbuttons;
 Macro pull_platform(
     [](){
       //auton_init({0_in, 0_in, 0_deg});
-      button_forward = -20;
+      button_forward = 20;
       lift_motor.move_absolute(0, 127);
       while (!lift_motor.is_stopped()) {
         pros::delay(1);
