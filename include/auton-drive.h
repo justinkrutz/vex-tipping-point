@@ -58,6 +58,9 @@ extern controllerbuttons::Macro blue_wp;
 extern controllerbuttons::Macro one_side;
 extern controllerbuttons::Macro point_and_shoot;
 extern controllerbuttons::Macro point_and_plus;
+extern controllerbuttons::Macro point_and_plus_old;
+extern controllerbuttons::Macro right_side_two;
+extern controllerbuttons::Macro point_and_plus_fast;
 
 } // namespace autonroutines
 

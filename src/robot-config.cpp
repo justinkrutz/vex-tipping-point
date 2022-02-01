@@ -24,6 +24,7 @@ pros::Motor ring_motor(11, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER
 
 pros::Gps gps(12, 0.07, 0.07);
 pros::IMU imu(13);
+pros::Distance back_distance(14);
 
 // okapi::Motor drive_fl (9, false, AbstractMotor::gearset::green, AbstractMotor::encoderUnits::degrees);
 // okapi::Motor drive_fr (10, true,  AbstractMotor::gearset::green, AbstractMotor::encoderUnits::degrees);

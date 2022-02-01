@@ -60,11 +60,11 @@ class MotorToggle {
       is_moving = false;
     } else {
       if (is_forward) {
-        motor = -127;
+        motor.move_velocity(-400);
         is_moving = true;
         was_forward = true;
       } else {
-        motor = 127;
+        motor.move_velocity(400);
         is_moving = true;
         was_forward = false;
       }
