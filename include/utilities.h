@@ -5,7 +5,7 @@
 #define DEG_PER_SEC 21600
 #define TRACKING_ORIGIN_OFFSET 1.5_in
 
-#define DRIVER_SLEW 3
+#define DRIVER_SLEW 12.5
 #define AUTON_SLEW 10
 
 #define ARM_RANGE 170

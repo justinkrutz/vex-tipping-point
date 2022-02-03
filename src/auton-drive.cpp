@@ -244,10 +244,8 @@ void motor_task()
   // std::shared_ptr<AbstractMotor> drive_br = x_model->getBottomRightMotor();
 
   // int time_last = 0;
-  Slew drive_fl_slew(DRIVER_SLEW);
-  Slew drive_fr_slew(DRIVER_SLEW);
-  Slew drive_bl_slew(DRIVER_SLEW);
-  Slew drive_br_slew(DRIVER_SLEW);
+  Slew drive_left_slew(DRIVER_SLEW);
+  Slew drive_right_slew(DRIVER_SLEW);
 
   while(1)
   {
@@ -272,10 +270,10 @@ void motor_task()
     // double turn    = button_turn + drivetoposition::turn    + pow(abs(temp_turn / 100), 1.8) * 100 * sgn(temp_turn);
     double sync = std::min(1.0, 100 / (fabs(forward) + fabs(turn)));
 
-    double drive_fl_pct = drive_fl_slew.new_value((forward + turn) * sync);
-    double drive_fr_pct = drive_fr_slew.new_value((forward - turn) * sync);
-    double drive_bl_pct = drive_bl_slew.new_value((forward + turn) * sync);
-    double drive_br_pct = drive_br_slew.new_value((forward - turn) * sync);
+    // double drive_fl_pct = drive_fl_slew.new_value((forward + turn) * sync);
+    // double drive_fr_pct = drive_fr_slew.new_value((forward - turn) * sync);
+    // double drive_bl_pct = drive_bl_slew.new_value((forward + turn) * sync);
+    // double drive_br_pct = drive_br_slew.new_value((forward - turn) * sync);
     // model->left(forward + turn);
     // model->right(forward - turn);
 
@@ -300,8 +298,16 @@ void motor_task()
       right_middle.move_velocity(right_drive);
       right_back.  move_velocity(right_drive);
     } else {
-      double left_drive  = stick_forward + stick_turn;
-      double right_drive = stick_forward - stick_turn;
+      double left_drive  = drive_left_slew.new_value(stick_forward + stick_turn);
+      double right_drive = drive_right_slew. new_value(stick_forward - stick_turn);
+      // left_front.  move_velocity(left_drive);
+      // left_middle. move_velocity(left_drive);
+      // left_back.   move_velocity(left_drive);
+      // right_front. move_velocity(right_drive);
+      // right_middle.move_velocity(right_drive);
+      // right_back.  move_velocity(right_drive);
+      // double left_drive  = stick_forward + stick_turn;
+      // double right_drive = stick_forward - stick_turn;
       left_front   = left_drive;
       left_middle  = left_drive;
       left_back    = left_drive;
@@ -718,16 +724,17 @@ Macro point_and_plus_fast(
 
       move_settings.start_output = 100;
       move_settings.mid_output = 100;
-      move_settings.end_output = 100;
+      move_settings.end_output = 50;
 
       lift::claw.retract();
-      lift_motor.move_absolute(10, 100);
+      lift_motor.move_absolute(-10, 100);
 
       add_target(43_in, 10_deg);
       wait_until_final_target_reached();
       lift::claw.extend();
-      lift_motor.move_absolute(10, 100);
       add_target(-23.5_in, 10_deg);
+      wait(500);
+      lift_motor.move_absolute(90, 100);
       wait_until_final_target_reached();
       move_settings.start_output = 20;
       move_settings.mid_output = 100;
@@ -769,13 +776,14 @@ Macro right_side_two(
       move_settings.end_output = 20;
 
       lift::claw.retract();
-      lift_motor.move_absolute(10, 100);
+      lift_motor.move_absolute(-10, 100);
 
       add_target(43_in, 0_deg);
       wait_until_final_target_reached(1300);
       lift::claw.extend();
-      lift_motor.move_absolute(10, 100);
       add_target(-24_in, 0_deg);
+      wait(500);
+      lift_motor.move_absolute(90, 100);
       add_target(-45_deg);
       add_target(15_in, -45_deg);
       add_target(135_deg);
@@ -797,6 +805,77 @@ Macro right_side_two(
       lift::tilter.extend();
       wait(1300);
       add_target(48_in, 135_deg);
+      wait_until_final_target_reached();
+    },
+    [](){
+      auton_clean_up();
+    },
+    {&auton_group});
+
+Macro skills(
+    [](){
+      auton_init({0_in, 0_in, 0_deg});
+
+      move_settings.start_output = 20;
+      move_settings.mid_output = 100;
+      move_settings.end_output = 20;
+
+      lift::claw.retract();
+      lift_motor.move_absolute(-10, 100);
+      add_target(4_in, 0_deg);
+      wait_until_final_target_reached(1000);
+      lift::claw.extend();
+      lift_motor.move_absolute(90, 100);
+      //pick up blue goal one
+
+      add_target(-12_in, 0_deg);
+      add_target(-90_deg);
+      add_target(24_in, -90_deg);
+      add_target(0_deg);
+      wait_until_final_target_reached();
+      lift_motor.move_absolute(360, 100);
+      add_target(48_in, 0_deg);
+      // drive to platform
+
+      add_target(90_deg);
+      wait_until_final_target_reached();
+      add_target(12_in, 90_deg);
+      wait_until_final_target_reached(1000);
+      lift_motor.move_absolute(-10, 100);
+      wait(500);
+      lift::claw.retract();
+
+      add_target(-6_in, 90_deg);
+      add_target(0_deg);
+      add_target(48_in, 0_deg);
+      wait_until_final_target_reached(2000);
+      lift::claw.extend();
+      add_target(-48_in, 0_deg);
+      wait(500);
+      lift_motor.move_absolute(90, 100);
+
+      add_target(90_deg);
+      add_target(12_in, 90_deg);
+      wait_until_final_target_reached(1000);
+      lift::tilter.retract();
+      lift_motor.move_absolute(-10, 100);
+      wait(500);
+      lift::claw.retract();
+
+      // wait(500);
+      move_settings.mid_output = 20;
+      move_settings.end_output = 15;
+      add_target(-36_in, 90_deg);
+      // wait_until_goal(3000);
+      wait_until_final_target_reached(3000);
+      move_settings.mid_output = 100;
+      move_settings.end_output = 20;
+      lift::tilter.extend();
+      wait(1300);
+      // Tall goal picked up
+
+
+      // add_target(48_in, 135_deg);
       wait_until_final_target_reached();
     },
     [](){
