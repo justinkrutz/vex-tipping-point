@@ -309,6 +309,7 @@ void create_folder_structure() {
   root_folder = new MenuFolder("", {
       new MenuAutonomous("Both Sides", autonroutines::blue_wp),
       new MenuAutonomous("Skills", autonroutines::skills),
+      new MenuAutonomous("Skills2", autonroutines::skills2),
       new MenuAutonomous("Right Side Two", autonroutines::right_side_two),
       new MenuAutonomous("Point and Plus Fast", autonroutines::point_and_plus_fast),
       new MenuFolder("Unused", {

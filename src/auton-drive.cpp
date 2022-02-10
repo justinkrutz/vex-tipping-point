@@ -1008,4 +1008,200 @@ Macro skills(
     },
     {&auton_group});
 
+Macro skills2(
+    [](){
+      auton_init({0_in, 0_in, 0_deg});
+
+      move_settings.start_output = 20;
+      move_settings.mid_output = 100;
+      move_settings.end_output = 20;
+
+      lift::claw.retract();
+      lift_motor.move_absolute(-10, 100);
+      add_target(4_in, 0_deg);
+      wait_until_final_target_reached();
+      lift::claw.extend();
+      // lift_motor.move_absolute(90, 100);
+      lift_motor.move_absolute(360, 100);
+      wait(1000);
+      //pick up blue goal one
+
+      // add_target(-7_in, 0_deg);
+      add_target(-90_deg);
+      add_target(24_in, -90_deg);
+      add_target(90_deg);
+      wait_until_final_target_reached();
+      lift::tilter.retract();
+      add_target(-78_in, 90_deg);
+      add_target(10_in, 90_deg);
+      wait_until_final_target_reached();
+      // lift::tilter.extend();
+      // push yellow goal one
+
+      add_target(0_deg);
+      // add_target(10_in, 0_deg);
+      // wait_until_final_target_reached();
+      // lift::tilter.retract();
+      // add_target(-30_in, 0_deg);
+      add_target(-12_in, 0_deg);
+      move_settings.mid_output = 20;
+      wait_until_final_target_reached(3000);
+      lift::tilter.extend();
+      wait(1000);
+      move_settings.mid_output = 100;
+      // pick up red goal one
+
+      add_target(40_in, 0_deg);
+      add_target(-70_deg);
+      wait_until_final_target_reached();
+      move_settings.mid_output = 20;
+      add_target(12_in, -70_deg);
+      wait_until_final_target_reached(1000);
+      move_settings.mid_output = 100;
+      // wait(500);
+      lift::claw.retract();
+      // drop blue goal one on blue platform
+
+      add_target(-4_in, -90_deg);
+      add_target(-5_deg);
+      wait_until_final_target_reached();
+      lift_motor.move_absolute(0, 100);
+      add_target(47_in, -5_deg);
+      add_target(-135_deg);
+      wait_until_final_target_reached();
+      lift_motor.move_absolute(-10, 100);
+      add_target(9_in, -135_deg);
+      wait_until_final_target_reached(1000);
+      lift::claw.extend();
+      add_target(-12_in, -135_deg);
+      wait_until_final_target_reached();
+      lift_motor.move_absolute(360, 100);
+      wait(1000);
+      // add_target(4_in, -135_deg);
+      // pick up red goal two
+
+      add_target(-70_deg);
+      add_target(-36_in, -70_deg);
+      add_target(-90_deg);
+      add_target(-40_in, -90_deg);
+      // push yellow goal two
+
+
+      add_target(-180_deg);
+      add_target(22_in, -180_deg);
+      wait_until_final_target_reached();
+      lift::tilter.retract();
+      add_target(8_in, -180_deg);
+      wait_until_final_target_reached();
+      wait(500);
+      add_target(-270_deg);
+      lift::tilter.extend();
+      wait_until_final_target_reached();
+      add_target(12_in, -270_deg);
+      wait_until_final_target_reached(1000);
+      lift::claw.retract();
+      add_target(-4_in, -270_deg);
+      // drop red goal one on red platform
+
+      add_target(-360_deg);
+      wait_until_final_target_reached();
+      lift_motor.move_absolute(-10, 100);
+      wait(800);
+      add_target(24_in, -360_deg);
+      wait_until_final_target_reached();
+      lift::claw.extend();
+      lift_motor.move_absolute(360, 100);
+      add_target(-18_in, -360_deg);
+      add_target(-270_deg);
+      wait_until_final_target_reached();
+      add_target(12_in, -270_deg);
+      wait_until_final_target_reached(1000);
+      lift::claw.retract();
+      // drop red goal two on the red platform
+
+      add_target(-4_in, -270_deg);
+      add_target(-360_deg);
+      wait_until_final_target_reached();
+      lift_motor.move_absolute(-10, 100);
+      add_target(40_in, -360_deg);
+      wait_until_final_target_reached(3000);
+      lift::claw.extend();
+      lift_motor.move_absolute(360, 100);
+      add_target(-325_deg);
+      add_target(-24_in, -325_deg);
+      add_target(-315_deg);
+      wait_until_final_target_reached();
+      wait(500);
+      lift::tilter.retract();
+      add_target(-12_in, -315_deg);
+      wait_until_final_target_reached();
+      lift::tilter.extend();
+      wait(1500);
+      add_target(-450_deg);
+      add_target(36_in, -450_deg);
+      wait_until_final_target_reached(4000);
+      lift::claw.retract();
+      add_target(-6_in, -450_deg);
+      add_target(-360_deg);
+      // pick up blue goal two
+
+      // lift::tilter.extend();
+      // pick up tall yellow goal
+
+
+      // move_settings.mid_output = 20;
+      // move_settings.end_output = 15;
+      // lift::tilter.retract();
+      // wait(500);
+      // wait_until_final_target_reached();
+      // add_target(-24_in, -135_deg);
+      // wait_until_final_target_reached(2000);
+      // wait(500);
+      // lift::tilter.extend();
+      // wait(1000);
+      // // pick up red goal two
+
+      // add_target(-180_deg);
+      // add_target(-84_in, -135_deg);
+
+      // wait(500);
+      // // lift_motor.move_absolute(360, 100);
+      // wait_until_final_target_reached();
+      // add_target(0_deg);
+      // add_target(48_in, 0_deg);
+      // wait_until_final_target_reached(2000);
+      // lift::claw.extend();
+      // add_target(-48_in, 0_deg);
+      // wait(500);
+      // lift_motor.move_absolute(90, 100);
+
+      // add_target(90_deg);
+      // add_target(12_in, 90_deg);
+      // wait_until_final_target_reached(1000);
+      // lift::tilter.retract();
+      // lift_motor.move_absolute(-10, 100);
+      // wait(500);
+      // lift::claw.retract();
+
+      // // wait(500);
+      // move_settings.mid_output = 20;
+      // move_settings.end_output = 15;
+      // add_target(-36_in, 90_deg);
+      // // wait_until_goal(3000);
+      // wait_until_final_target_reached(3000);
+      // move_settings.mid_output = 100;
+      // move_settings.end_output = 20;
+      // lift::tilter.extend();
+      // wait(1300);
+      // // Tall goal picked up
+
+
+      // add_target(48_in, 135_deg);
+      wait_until_final_target_reached();
+    },
+    [](){
+      auton_clean_up();
+    },
+    {&auton_group});
+
 } // namespace autonroutines
