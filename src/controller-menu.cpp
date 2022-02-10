@@ -319,6 +319,7 @@ void create_folder_structure() {
         new MenuAutonomous("Point and Plus Sensor", autonroutines::point_and_plus),
         new MenuAutonomous("Point and Plus Old", autonroutines::point_and_plus_old),
         new MenuAutonomous("Test", autonroutines::test),
+        new MenuAutonomous("point_and_plus_4", autonroutines::point_and_plus_4),
       })
     // new MenuAutonomous("Home Row Three", autonroutines::home_row_three),
     // new MenuAutonomous("ShawnTon 3.0", autonroutines::shawnton_three),

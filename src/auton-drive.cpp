@@ -698,8 +698,54 @@ Macro point_and_plus_old(
       move_settings.end_output = 15;
       lift::tilter.retract();
       wait(500);
-      add_target(-12_in, -45_deg);
+      add_target(-14_in, -45_deg);
+      wait_until_final_target_reached(3000);
+      wait(500);
+      lift::tilter.extend();
+      wait(1000);
+      ring_motor.move_velocity(400);
+      wait(2000);
+      ring_motor.move_velocity(-400);
+      wait(300);
+      ring_motor.move_velocity(400);
+      wait(2000);
+      ring_motor.move_velocity(0);
+      add_target(6_in, -45_deg);
       wait_until_final_target_reached();
+    },
+    [](){
+      auton_clean_up();
+    },
+    {&auton_group});
+
+Macro point_and_plus_4(
+    [](){
+      auton_init({57_in, 32_in, 10_deg});
+
+      move_settings.start_output = 100;
+      move_settings.mid_output = 100;
+      move_settings.end_output = 20;
+
+      lift::claw.retract();
+      lift_motor.move_absolute(10, 100);
+
+      add_target(43_in, 10_deg);
+      wait_until_final_target_reached();
+      lift::claw.extend();
+      lift_motor.move_absolute(10, 100);
+      move_settings.start_output = 20;
+      move_settings.ramp_down_p = 0.2;
+      add_target(-23.5_in, 10_deg);
+      add_target(45_deg);
+      add_target(-12_in, 45_deg);
+      add_target(-45_deg);
+      wait_until_final_target_reached();
+      move_settings.mid_output = 20;
+      move_settings.end_output = 15;
+      lift::tilter.retract();
+      wait(500);
+      add_target(-14_in, -45_deg);
+      wait_until_final_target_reached(3000);
       wait(500);
       lift::tilter.extend();
       wait(1000);
@@ -722,9 +768,14 @@ Macro point_and_plus_fast(
     [](){
       auton_init({57_in, 32_in, 10_deg});
 
+      turn_settings.start_output = 20;
+      turn_settings.mid_output = 50;
+      turn_settings.end_output = 20;
+
       move_settings.start_output = 100;
       move_settings.mid_output = 100;
-      move_settings.end_output = 50;
+      move_settings.end_output = 30;
+      move_settings.ramp_down_p = 0.09;
 
       lift::claw.retract();
       lift_motor.move_absolute(-10, 100);
@@ -732,23 +783,27 @@ Macro point_and_plus_fast(
       add_target(43_in, 10_deg);
       wait_until_final_target_reached();
       lift::claw.extend();
+      move_settings.ramp_down_p = 0.2;
+      move_settings.end_output = 20;
       add_target(-23.5_in, 10_deg);
       wait(500);
       lift_motor.move_absolute(90, 100);
       wait_until_final_target_reached();
       move_settings.start_output = 20;
-      move_settings.mid_output = 100;
-      move_settings.end_output = 20;
-      add_target(45_deg);
-      add_target(-12_in, 45_deg);
-      add_target(-45_deg);
+      add_target(30_deg);
+      add_target(-11_in, 30_deg);
+      turn_settings.mid_output = 30;
+      add_target(-53_deg);
       wait_until_final_target_reached();
       move_settings.mid_output = 20;
       move_settings.end_output = 15;
       lift::tilter.retract();
       wait(500);
-      add_target(-12_in, -45_deg);
+      add_target(-12_in, -53_deg);
       wait_until_final_target_reached();
+      move_settings.start_output = 20;
+      move_settings.mid_output = 100;
+      move_settings.end_output = 20;
       wait(500);
       lift::tilter.extend();
       wait(1000);
@@ -757,10 +812,16 @@ Macro point_and_plus_fast(
       ring_motor.move_velocity(-400);
       wait(300);
       ring_motor.move_velocity(400);
-      wait(2000);
+      wait(1000);
       ring_motor.move_velocity(0);
       add_target(6_in, -45_deg);
+      add_target(45_deg);
       wait_until_final_target_reached();
+      add_target(-20_in, 45_deg);
+      wait_until_final_target_reached(1000);
+      add_target(3_in, 45_deg);
+      wait_until_final_target_reached();
+      lift::tilter.retract();
     },
     [](){
       auton_clean_up();
@@ -787,6 +848,8 @@ Macro right_side_two(
       add_target(-45_deg);
       add_target(15_in, -45_deg);
       add_target(135_deg);
+      wait_until_final_target_reached();
+      add_target(120_deg);
       wait_until_final_target_reached();
       lift::tilter.retract();
       wait(500);
@@ -858,6 +921,13 @@ Macro skills(
 
       add_target(44_in, 0_deg);
       add_target(-70_deg);
+      ring_motor.move_velocity(400);
+      wait(2000);
+      ring_motor.move_velocity(-400);
+      wait(300);
+      ring_motor.move_velocity(400);
+      wait(1000);
+      ring_motor.move_velocity(0);
       wait_until_final_target_reached();
       move_settings.mid_output = 20;
       add_target(12_in, -70_deg);
@@ -930,22 +1000,22 @@ Macro skills(
       // drop red goal two on the red platform
 
       add_target(-4_in, -270_deg);
-      add_target(-355_deg);
+      add_target(-350_deg);
       wait_until_final_target_reached();
       lift_motor.move_absolute(-10, 100);
-      add_target(42_in, -355_deg);
+      add_target(42_in, -350_deg);
       wait_until_final_target_reached(4000);
       // move_settings.mid_output = 100;
       lift::claw.extend();
       lift_motor.move_absolute(360, 100);
-      add_target(-335_deg);
+      add_target(-345_deg);
       wait_until_final_target_reached();
       lift::tilter.retract();
-      add_target(-24_in, -335_deg);
+      add_target(-24_in, -345_deg);
       wait_until_final_target_reached();
       add_target(-320_deg);
       // wait(500);
-      add_target(-16_in, -320_deg);
+      add_target(-18_in, -320_deg);
       wait_until_final_target_reached();
       wait(500);
       move_settings.mid_output = 50;
@@ -961,58 +1031,6 @@ Macro skills(
       add_target(-360_deg);
       // pick up blue goal two
 
-      // lift::tilter.extend();
-      // pick up tall yellow goal
-
-
-      // move_settings.mid_output = 20;
-      // move_settings.end_output = 15;
-      // lift::tilter.retract();
-      // wait(500);
-      // wait_until_final_target_reached();
-      // add_target(-24_in, -135_deg);
-      // wait_until_final_target_reached(2000);
-      // wait(500);
-      // lift::tilter.extend();
-      // wait(1000);
-      // // pick up red goal two
-
-      // add_target(-180_deg);
-      // add_target(-84_in, -135_deg);
-
-      // wait(500);
-      // // lift_motor.move_absolute(360, 100);
-      // wait_until_final_target_reached();
-      // add_target(0_deg);
-      // add_target(48_in, 0_deg);
-      // wait_until_final_target_reached(2000);
-      // lift::claw.extend();
-      // add_target(-48_in, 0_deg);
-      // wait(500);
-      // lift_motor.move_absolute(90, 100);
-
-      // add_target(90_deg);
-      // add_target(12_in, 90_deg);
-      // wait_until_final_target_reached(1000);
-      // lift::tilter.retract();
-      // lift_motor.move_absolute(-10, 100);
-      // wait(500);
-      // lift::claw.retract();
-
-      // // wait(500);
-      // move_settings.mid_output = 20;
-      // move_settings.end_output = 15;
-      // add_target(-36_in, 90_deg);
-      // // wait_until_goal(3000);
-      // wait_until_final_target_reached(3000);
-      // move_settings.mid_output = 100;
-      // move_settings.end_output = 20;
-      // lift::tilter.extend();
-      // wait(1300);
-      // // Tall goal picked up
-
-
-      // add_target(48_in, 135_deg);
       wait_until_final_target_reached();
     },
     [](){
@@ -1020,7 +1038,7 @@ Macro skills(
     },
     {&auton_group});
 
-Macro skills2(
+    Macro skills2(
     [](){
       auton_init({0_in, 0_in, 0_deg});
 
@@ -1028,6 +1046,7 @@ Macro skills2(
       move_settings.mid_output = 100;
       move_settings.end_output = 20;
 
+      // turn_settings.mid_output = 30;
       lift::claw.retract();
       lift_motor.move_absolute(-10, 100);
       add_target(4_in, 0_deg);
@@ -1055,7 +1074,7 @@ Macro skills2(
       // wait_until_final_target_reached();
       // lift::tilter.retract();
       // add_target(-30_in, 0_deg);
-      add_target(-12_in, 0_deg);
+      add_target(-16_in, 0_deg);
       move_settings.mid_output = 20;
       wait_until_final_target_reached(3000);
       lift::tilter.extend();
@@ -1063,8 +1082,15 @@ Macro skills2(
       move_settings.mid_output = 100;
       // pick up red goal one
 
-      add_target(40_in, 0_deg);
+      add_target(44_in, 0_deg);
       add_target(-70_deg);
+      ring_motor.move_velocity(400);
+      wait(2000);
+      ring_motor.move_velocity(-400);
+      wait(300);
+      ring_motor.move_velocity(400);
+      wait(1000);
+      ring_motor.move_velocity(0);
       wait_until_final_target_reached();
       move_settings.mid_output = 20;
       add_target(12_in, -70_deg);
@@ -1079,37 +1105,38 @@ Macro skills2(
       wait_until_final_target_reached();
       lift_motor.move_absolute(0, 100);
       add_target(47_in, -5_deg);
-      add_target(-135_deg);
+      add_target(-132_deg);
       wait_until_final_target_reached();
       lift_motor.move_absolute(-10, 100);
-      add_target(9_in, -135_deg);
+      add_target(9_in, -132_deg);
       wait_until_final_target_reached(1000);
       lift::claw.extend();
-      add_target(-12_in, -135_deg);
+      add_target(-8_in, -132_deg);
       wait_until_final_target_reached();
       lift_motor.move_absolute(360, 100);
       wait(1000);
-      // add_target(4_in, -135_deg);
+      // add_target(4_in, -132_deg);
       // pick up red goal two
 
-      add_target(-70_deg);
-      add_target(-36_in, -70_deg);
-      add_target(-90_deg);
-      add_target(-40_in, -90_deg);
+      add_target(-40_deg);
+      add_target(-16_in, -40_deg);
+      add_target(-95_deg);
+      add_target(-66_in, -95_deg);
       // push yellow goal two
 
 
       add_target(-180_deg);
-      add_target(22_in, -180_deg);
+      add_target(18_in, -180_deg);
       wait_until_final_target_reached();
       lift::tilter.retract();
+      wait(500);
       add_target(8_in, -180_deg);
       wait_until_final_target_reached();
       wait(500);
       add_target(-270_deg);
       lift::tilter.extend();
       wait_until_final_target_reached();
-      add_target(12_in, -270_deg);
+      add_target(6_in, -270_deg);
       wait_until_final_target_reached(1000);
       lift::claw.retract();
       add_target(-4_in, -270_deg);
@@ -1119,101 +1146,60 @@ Macro skills2(
       wait_until_final_target_reached();
       lift_motor.move_absolute(-10, 100);
       wait(800);
-      add_target(24_in, -360_deg);
+      move_settings.mid_output = 50;
+      add_target(32_in, -360_deg);
       wait_until_final_target_reached();
       lift::claw.extend();
       lift_motor.move_absolute(360, 100);
-      add_target(-18_in, -360_deg);
+      add_target(-22_in, -360_deg);
+      wait_until_final_target_reached();
+      turn_settings.mid_output = 20;
       add_target(-270_deg);
       wait_until_final_target_reached();
-      add_target(12_in, -270_deg);
-      wait_until_final_target_reached(1000);
+      turn_settings.mid_output = 50;
+      add_target(6_in, -270_deg);
+      wait_until_final_target_reached(2000);
       lift::claw.retract();
       // drop red goal two on the red platform
 
       add_target(-4_in, -270_deg);
-      add_target(-360_deg);
+      add_target(-350_deg);
       wait_until_final_target_reached();
       lift_motor.move_absolute(-10, 100);
-      add_target(40_in, -360_deg);
-      wait_until_final_target_reached(3000);
+      add_target(42_in, -350_deg);
+      wait_until_final_target_reached(4000);
+      // move_settings.mid_output = 100;
       lift::claw.extend();
       lift_motor.move_absolute(360, 100);
-      add_target(-325_deg);
-      add_target(-24_in, -325_deg);
-      add_target(-315_deg);
+      add_target(-345_deg);
+      wait_until_final_target_reached();
+      lift::tilter.retract();
+      add_target(-24_in, -345_deg);
+      wait_until_final_target_reached();
+      add_target(-320_deg);
+      // wait(500);
+      add_target(-18_in, -320_deg);
       wait_until_final_target_reached();
       wait(500);
-      lift::tilter.retract();
-      add_target(-12_in, -315_deg);
-      wait_until_final_target_reached();
+      move_settings.mid_output = 50;
       lift::tilter.extend();
       wait(1500);
+      add_target(-12_in, -320_deg);
       add_target(-450_deg);
+      wait_until_final_target_reached();
       add_target(36_in, -450_deg);
-      wait_until_final_target_reached(4000);
+      wait_until_final_target_reached(5000);
       lift::claw.retract();
       add_target(-6_in, -450_deg);
       add_target(-360_deg);
       // pick up blue goal two
 
-      // lift::tilter.extend();
-      // pick up tall yellow goal
-
-
-      // move_settings.mid_output = 20;
-      // move_settings.end_output = 15;
-      // lift::tilter.retract();
-      // wait(500);
-      // wait_until_final_target_reached();
-      // add_target(-24_in, -135_deg);
-      // wait_until_final_target_reached(2000);
-      // wait(500);
-      // lift::tilter.extend();
-      // wait(1000);
-      // // pick up red goal two
-
-      // add_target(-180_deg);
-      // add_target(-84_in, -135_deg);
-
-      // wait(500);
-      // // lift_motor.move_absolute(360, 100);
-      // wait_until_final_target_reached();
-      // add_target(0_deg);
-      // add_target(48_in, 0_deg);
-      // wait_until_final_target_reached(2000);
-      // lift::claw.extend();
-      // add_target(-48_in, 0_deg);
-      // wait(500);
-      // lift_motor.move_absolute(90, 100);
-
-      // add_target(90_deg);
-      // add_target(12_in, 90_deg);
-      // wait_until_final_target_reached(1000);
-      // lift::tilter.retract();
-      // lift_motor.move_absolute(-10, 100);
-      // wait(500);
-      // lift::claw.retract();
-
-      // // wait(500);
-      // move_settings.mid_output = 20;
-      // move_settings.end_output = 15;
-      // add_target(-36_in, 90_deg);
-      // // wait_until_goal(3000);
-      // wait_until_final_target_reached(3000);
-      // move_settings.mid_output = 100;
-      // move_settings.end_output = 20;
-      // lift::tilter.extend();
-      // wait(1300);
-      // // Tall goal picked up
-
-
-      // add_target(48_in, 135_deg);
       wait_until_final_target_reached();
     },
     [](){
       auton_clean_up();
     },
     {&auton_group});
+
 
 } // namespace autonroutines
