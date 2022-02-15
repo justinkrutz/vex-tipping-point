@@ -113,7 +113,7 @@ void autonomous() {
  */
 void opcontrol() {
   if (open_claw_on_start && !auton_has_run) {
-    lift::claw.retract();
+    // lift::claw.retract();
   }
   if (pros::competition::is_connected()) {
     set_drive_callbacks();
