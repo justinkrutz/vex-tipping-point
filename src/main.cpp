@@ -13,6 +13,8 @@
 
 
 bool menu_enabled = true;
+bool open_claw_on_start = false;
+bool auton_has_run = false;
 
 void set_drive_callbacks() {
   menu_enabled = false;
@@ -61,6 +63,7 @@ void initialize() {
  * the robot is enabled, this task will exit.
  */
 void disabled() {
+  open_claw_on_start = true;
   autondrive::auton_group.terminate();
   // odomutilities::errorcorrection::auto_goal_center = true;
 }
@@ -88,6 +91,7 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
+  auton_has_run = true;
   controllermenu::run_auton();
 
   // while (true) {
@@ -108,6 +112,9 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+  if (open_claw_on_start && !auton_has_run) {
+    lift::claw.retract();
+  }
   if (pros::competition::is_connected()) {
     set_drive_callbacks();
   } else {

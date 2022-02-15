@@ -22,11 +22,13 @@ Piston::Piston(pros::ADIDigitalOut& piston, bool is_double) : piston(piston), is
 void Piston::extend() {
   piston.set_value(true);
   piston_cycles++;
+  piston_out = true;
   print();
 }
 
 void Piston::retract() {
   piston.set_value(false);
+  piston_out = false;
   if (is_double) {
     piston_cycles++;
   }
@@ -81,17 +83,31 @@ Piston tilter(back_tilter);
 
 MotorToggle intake(ring_motor);
 
+bool auto_grip = true;
+
+void task_function() {
+  while (true) {
+    if (auto_grip && goal_sensor.get_new_press()) {
+      claw.extend();
+    }
+    pros::delay(1);
+  }
+}
+
 void set_callbacks() {
   using namespace controllerbuttons;
   // button_handler.master.r1.pressed.set(toggle_grabber);
+  button_handler.master. x.pressed .set([&](){ auto_grip = true; });
+  button_handler.master. b.pressed .set([&](){ auto_grip = false; });
   button_handler.master.r1.pressed .set([&](){ claw.toggle(); });
   button_handler.master.r2.pressed .set([&](){ tilter.toggle(); });
   // button_handler.master.r2.pressed.set_macro();
 
   button_handler.master.up  .pressed .set([&](){ intake.toggle(); });//ring_motor = 127;
 //  button_handler.master.up  .released.set([&](){ lift.toggle(true); });//ring_motor = 0;
-  button_handler.master.down.pressed .set([&](){ intake.toggle(true); });//ring_motor = -127;
+//  button_handler.master.down.pressed .set([&](){ intake.toggle(true); });//ring_motor = -127;
 //  button_handler.master.down.released.set([&](){ lift.toggle(); });//ring_motor = 0;
+  pros::Task task(task_function);
 
   button_handler.master.l1.pressed .set([&](){ lift_motor = 127; });
   button_handler.master.l1.released.set([&](){ lift_motor = 0; });

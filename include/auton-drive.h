@@ -62,7 +62,7 @@ extern controllerbuttons::Macro point_and_plus_old;
 extern controllerbuttons::Macro right_side_two;
 extern controllerbuttons::Macro point_and_plus_fast;
 extern controllerbuttons::Macro skills;
-extern controllerbuttons::Macro skill2;
+extern controllerbuttons::Macro skills2;
 extern controllerbuttons::Macro point_and_plus_4;
 
 } // namespace autonroutines
