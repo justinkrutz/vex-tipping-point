@@ -87,7 +87,7 @@ bool auto_grip = true;
 
 void task_function() {
   while (true) {
-    if (auto_grip && goal_sensor.get_new_press()) {
+    if (auto_grip && goal_sensor.get_new_press() && !claw.piston_out) {
       claw.extend();
     }
     pros::delay(1);

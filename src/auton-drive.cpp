@@ -774,18 +774,18 @@ Macro point_and_plus_fast(
 
       move_settings.start_output = 100;
       move_settings.mid_output = 100;
-      move_settings.end_output = 30;
+      move_settings.end_output = 100;
       move_settings.ramp_down_p = 0.09;
 
       lift::claw.retract();
       lift_motor.move_absolute(-10, 100);
 
-      add_target(43_in, 10_deg);
+      add_target(46_in, 10_deg);
       wait_until_final_target_reached();
       lift::claw.extend();
       move_settings.ramp_down_p = 0.2;
       move_settings.end_output = 20;
-      add_target(-23.5_in, 10_deg);
+      add_target(-26.5_in, 10_deg);
       wait(500);
       lift_motor.move_absolute(90, 100);
       wait_until_final_target_reached();
