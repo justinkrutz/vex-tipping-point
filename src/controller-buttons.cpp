@@ -3,6 +3,7 @@
 #include <bits/stdc++.h>
 
 #include "controller-buttons.h"
+#include "controller-menu.h"
 #include "robot-config.h"
 
 namespace controllerbuttons {
@@ -30,6 +31,8 @@ void Macro::start_wrapper_(){
     function_();
   }
   catch (TaskInterruptedException& e) {
+    controllermenu::master_print_array[2] = "Caught";
+
     std::cout << e.what() << std::endl;
   }
   clean_up_();
@@ -61,10 +64,15 @@ void Macro::start() {
 }
 
 void Macro::terminate() {
+  controllermenu::master_print_array[1] = "Macro::terminate";
+
   for (auto &macro : macros_) {
     if (macro->is_running_) {
       macro->task_->notify_ext(TASK_SHOULD_END, pros::E_NOTIFY_ACTION_BITS, NULL);
     }
+  }
+  if (is_running_) {
+    task_->notify_ext(TASK_SHOULD_END, pros::E_NOTIFY_ACTION_BITS, NULL);
   }
 }
 

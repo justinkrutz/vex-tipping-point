@@ -307,11 +307,14 @@ MenuAutonomous &selected_auton = default_auton;
 
 void create_folder_structure() {
   root_folder = new MenuFolder("", {
+      new MenuAutonomous("Shawnton 4.0", autonroutines::shawnton_4_0),
       new MenuAutonomous("Both Sides", autonroutines::blue_wp),
       new MenuAutonomous("Skills", autonroutines::skills),
       new MenuAutonomous("Skills2", autonroutines::skills2),
       new MenuAutonomous("Right Side Two", autonroutines::right_side_two),
       new MenuAutonomous("Point and Plus Fast", autonroutines::point_and_plus_fast),
+      new MenuAutonomous("Left Side Rings", autonroutines::left_side_rings),
+      new MenuAutonomous("right_yellow_win_point", autonroutines::right_yellow_win_point),
       new MenuFolder("Unused", {
         new MenuAutonomous("None", autonroutines::none),
         new MenuAutonomous("One Side", autonroutines::one_side),
@@ -339,6 +342,10 @@ void create_folder_structure() {
 
 void run_auton() {
   selected_auton.run();
+}
+
+void abort_auton() {
+  selected_auton.abort();
 }
 
 void init() {

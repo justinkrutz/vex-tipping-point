@@ -112,6 +112,7 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+  controllermenu::abort_auton();
   if (open_claw_on_start && !auton_has_run) {
     // lift::claw.retract();
   }

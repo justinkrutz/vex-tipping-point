@@ -83,12 +83,15 @@ Piston tilter(back_tilter);
 
 MotorToggle intake(ring_motor);
 
-bool auto_grip = true;
+bool auto_grip_enabled = true;
+bool auto_grip_ready = true;
+bool goal_auto_gripped = false;
 
 void task_function() {
   while (true) {
-    if (auto_grip && goal_sensor.get_new_press() && !claw.piston_out) {
+    if (auto_grip_enabled && auto_grip_ready && goal_sensor.get_new_press() && !claw.piston_out) {
       claw.extend();
+      goal_auto_gripped = true;
     }
     pros::delay(1);
   }
@@ -97,15 +100,20 @@ void task_function() {
 void set_callbacks() {
   using namespace controllerbuttons;
   // button_handler.master.r1.pressed.set(toggle_grabber);
-  button_handler.master. x.pressed .set([&](){ auto_grip = true; });
-  button_handler.master. b.pressed .set([&](){ auto_grip = false; });
-  button_handler.master.r1.pressed .set([&](){ claw.toggle(); });
+  // button_handler.master. x.pressed .set([&](){ auto_grip_enabled = true; });
+  // button_handler.master. b.pressed .set([&](){ auto_grip_enabled = false; });
+  // button_handler.master.r1.pressed .set([&](){ claw.toggle(); });
+  // button_handler.master.r2.pressed .set([&](){ tilter.toggle(); });
+  button_handler.master. x.pressed .set([&](){ auto_grip_enabled = true; });
+  button_handler.master. b.pressed .set([&](){ auto_grip_enabled = false; });
+  button_handler.master.r1.released.set([&](){ if(goal_auto_gripped){claw.extend(); goal_auto_gripped = false;} else { claw.toggle();} auto_grip_ready = false; });
+  button_handler.master.r1.pressed .set([&](){ auto_grip_ready = true; });
   button_handler.master.r2.pressed .set([&](){ tilter.toggle(); });
   // button_handler.master.r2.pressed.set_macro();
 
   button_handler.master.up  .pressed .set([&](){ intake.toggle(); });//ring_motor = 127;
 //  button_handler.master.up  .released.set([&](){ lift.toggle(true); });//ring_motor = 0;
-//  button_handler.master.down.pressed .set([&](){ intake.toggle(true); });//ring_motor = -127;
+ button_handler.master.down.pressed .set([&](){ intake.toggle(true); });//ring_motor = -127;
 //  button_handler.master.down.released.set([&](){ lift.toggle(); });//ring_motor = 0;
   pros::Task task(task_function);
 

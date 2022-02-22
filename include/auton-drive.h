@@ -54,6 +54,7 @@ namespace autonroutines {
 
 extern controllerbuttons::Macro none;
 extern controllerbuttons::Macro test;
+extern controllerbuttons::Macro left_side_rings;
 extern controllerbuttons::Macro blue_wp;
 extern controllerbuttons::Macro one_side;
 extern controllerbuttons::Macro point_and_shoot;
@@ -64,6 +65,8 @@ extern controllerbuttons::Macro point_and_plus_fast;
 extern controllerbuttons::Macro skills;
 extern controllerbuttons::Macro skills2;
 extern controllerbuttons::Macro point_and_plus_4;
+extern controllerbuttons::Macro shawnton_4_0;
+extern controllerbuttons::Macro right_yellow_win_point;
 
 } // namespace autonroutines
 
