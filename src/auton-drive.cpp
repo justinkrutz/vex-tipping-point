@@ -47,8 +47,8 @@ void Target::init_if_new() {
   if (is_new) {
     is_new = false;
     starting_state = get_odom_state();
-    left_front.tare_position();
-    right_front.tare_position();
+    // left_front.tare_position(); // TODO: Uncomment this block!
+    // right_front.tare_position();
     millis_at_start = pros::millis();
   }
 }
@@ -100,7 +100,8 @@ void update() {
 
   double x_d = target.x.convert(inch);
 
-  double distance_moved = fabs(((right_front.get_position() + left_front.get_position())/2)*5.62753492038/360);
+  double distance_moved = 0; // TODO: Delete this!
+  // double distance_moved = fabs(((right_front.get_position() + left_front.get_position())/2)*5.62753492038/360);  // TODO: Uncomment this!
 
   Point target_point{target.x, target.y};
 
@@ -291,12 +292,12 @@ void motor_task()
       // controllermenu::master_print_array[2] = "auton_drive_enabled";
       double left_drive  = 6 * (forward + turn);
       double right_drive = 6 * (forward - turn);
-      left_front.  move_velocity(left_drive);
-      left_middle. move_velocity(left_drive);
-      left_back.   move_velocity(left_drive);
-      right_front. move_velocity(right_drive);
-      right_middle.move_velocity(right_drive);
-      right_back.  move_velocity(right_drive);
+      // left_front.  move_velocity(left_drive); // TODO: Uncomment this block!
+      // left_middle. move_velocity(left_drive);
+      // left_back.   move_velocity(left_drive);
+      // right_front. move_velocity(right_drive);
+      // right_middle.move_velocity(right_drive);
+      // right_back.  move_velocity(right_drive);
     } else {
       double left_drive  = drive_left_slew.new_value(stick_forward + stick_turn);
       double right_drive = drive_right_slew. new_value(stick_forward - stick_turn);
@@ -308,12 +309,12 @@ void motor_task()
       // right_back.  move_velocity(right_drive);
       // double left_drive  = stick_forward + stick_turn;
       // double right_drive = stick_forward - stick_turn;
-      left_front   = left_drive;
-      left_middle  = left_drive;
-      left_back    = left_drive;
-      right_front  = right_drive;
-      right_middle = right_drive;
-      right_back   = right_drive;
+      // left_front   = left_drive; // TODO: Uncomment this block!
+      // left_middle  = left_drive;
+      // left_back    = left_drive;
+      // right_front  = right_drive;
+      // right_middle = right_drive;
+      // right_back   = right_drive;
     }
 
     pros::delay(5);

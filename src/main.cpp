@@ -43,7 +43,7 @@ void initialize() {
   // chassis->setState({15.7416_in, 31.4911_in, -90_deg});
   // imu_odom->setState({15.7416_in, 31.4911_in, -90_deg});
   // optical_sensor.set_led_pwm(100);
-  pros::Task(autondrive::motor_task);
+  // pros::Task(autondrive::motor_task); // TODO: Uncoment this!
   lift::set_callbacks();
   // robotfunctions::set_callbacks();
   // ballsystem::set_callbacks();
@@ -112,6 +112,24 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+    // Chassis Controller - lets us drive the robot around with open- or closed-loop control
+    // std::shared_ptr<ChassisController> drive = ChassisControllerBuilder()
+    //     .withMotors(
+    //         {5, -6, 7},
+    //         {-8, 9, -10})
+    //     // Green gearset, 4 in wheel diam, 11.5 in wheel track
+    //     .withDimensions(
+    //         AbstractMotor::GearsetRatioPair(AbstractMotor::gearset::blue, 3.0/7.0),
+    //         {{4.1797_in, 10.6016_in}, imev5BlueTPR})
+    //     .build();
+    std::shared_ptr<ChassisController> drive = ChassisControllerBuilder()
+        .withMotors(5, -8)
+        // Green gearset, 4 in wheel diam, 11.5 in wheel track
+        .withDimensions(AbstractMotor::gearset::green, {{4_in, 11.5_in}, imev5GreenTPR})
+        .build();
+    
+
+
   controllermenu::abort_auton();
   if (open_claw_on_start && !auton_has_run) {
     // lift::claw.retract();
@@ -124,6 +142,8 @@ void opcontrol() {
   controllermenu::partner_print_array[0] = "test";
 
   while (true) {
+    drive->getModel()->arcade(master.get_analog(ANALOG_RIGHT_Y),
+                              master.get_analog(ANALOG_RIGHT_X));
     controllerbuttons::run_buttons();
     // ballsystem::debug();
     if (!menu_enabled) {

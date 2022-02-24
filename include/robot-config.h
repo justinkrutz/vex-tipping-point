@@ -9,12 +9,12 @@ extern std::shared_ptr<SkidSteerModel> skid_model;
 extern pros::Controller master;
 extern pros::Controller partner;
 
-extern pros::Motor left_front;
-extern pros::Motor left_middle;
-extern pros::Motor left_back;
-extern pros::Motor right_front;
-extern pros::Motor right_middle;
-extern pros::Motor right_back;
+// extern pros::Motor left_front; // TODO: Uncomment this block!
+// extern pros::Motor left_middle;
+// extern pros::Motor left_back;
+// extern pros::Motor right_front;
+// extern pros::Motor right_middle;
+// extern pros::Motor right_back;
 
 extern pros::Motor lift_motor;
 extern pros::Rotation lift_sensor;
