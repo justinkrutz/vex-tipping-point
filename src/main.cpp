@@ -37,7 +37,7 @@ void set_drive_callbacks() {
 
 void initialize() {
   // lift_gripper.set_value(1);
-  // build_chassis();
+  build_chassis();
   // odom_init();
   // chassis->setState({13.491_in, 34.9911_in, 0_deg});
   // chassis->setState({15.7416_in, 31.4911_in, -90_deg});
@@ -112,23 +112,6 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-    // Chassis Controller - lets us drive the robot around with open- or closed-loop control
-    // std::shared_ptr<ChassisController> drive = ChassisControllerBuilder()
-    //     .withMotors(
-    //         {5, -6, 7},
-    //         {-8, 9, -10})
-    //     // Green gearset, 4 in wheel diam, 11.5 in wheel track
-    //     .withDimensions(
-    //         AbstractMotor::GearsetRatioPair(AbstractMotor::gearset::blue, 3.0/7.0),
-    //         {{4.1797_in, 10.6016_in}, imev5BlueTPR})
-    //     .build();
-    std::shared_ptr<ChassisController> drive = ChassisControllerBuilder()
-        .withMotors(5, -8)
-        // Green gearset, 4 in wheel diam, 11.5 in wheel track
-        .withDimensions(AbstractMotor::gearset::green, {{4_in, 11.5_in}, imev5GreenTPR})
-        .build();
-    
-
 
   controllermenu::abort_auton();
   if (open_claw_on_start && !auton_has_run) {
@@ -141,11 +124,15 @@ void opcontrol() {
   }
   controllermenu::partner_print_array[0] = "test";
 
+  Controller okapi_master;
+
+
   while (true) {
-    drive->getModel()->arcade(master.get_analog(ANALOG_RIGHT_Y),
-                              master.get_analog(ANALOG_RIGHT_X));
+    // Arcade drive with the left stick
+    chassis->getModel()->arcade(okapi_master.getAnalog(ControllerAnalog::rightY),
+                               okapi_master.getAnalog(ControllerAnalog::rightX));
+
     controllerbuttons::run_buttons();
-    // ballsystem::debug();
     if (!menu_enabled) {
       // QLength imu_x = imu_odom->getState().x;
       // QLength imu_y = imu_odom->getState().y;
@@ -154,12 +141,12 @@ void opcontrol() {
       // controllermenu::master_print_array[1] = std::to_string(tracker_right.get_position()) + " " + std::to_string(imu_y.convert(inch));
       // controllermenu::master_print_array[2] = std::to_string(tracker_back.get_position())  + " " + std::to_string(imu_theta.convert(degree));
       
-      // QLength x = chassis->getState().x;
-      // QLength y = chassis->getState().y;
-      // QAngle theta = chassis->getState().theta;
-      // controllermenu::partner_print_array[0] = std::to_string(tracker_left.get_position())  + " " + std::to_string(x.convert(inch));
-      // controllermenu::partner_print_array[1] = std::to_string(tracker_right.get_position()) + " " + std::to_string(y.convert(inch));
-      // controllermenu::partner_print_array[2] = std::to_string(tracker_back.get_position())  + " " + std::to_string(theta.convert(degree));
+      QLength x = chassis->getState().x;
+      QLength y = chassis->getState().y;
+      QAngle theta = chassis->getState().theta;
+      controllermenu::partner_print_array[0] = std::to_string(tracker_left.get_position())  + " " + std::to_string(x.convert(inch));
+      controllermenu::partner_print_array[1] = std::to_string(tracker_right.get_position()) + " " + std::to_string(y.convert(inch));
+      controllermenu::partner_print_array[2] = std::to_string(tracker_back.get_position())  + " " + std::to_string(theta.convert(degree));
       
       // controllermenu::master_print_array[0] = std::to_string(optical_sensor.get_raw().red)   + " " + std::to_string(optical_sensor.get_rgb().red);
       // controllermenu::master_print_array[1] = std::to_string(optical_sensor.get_hue());
