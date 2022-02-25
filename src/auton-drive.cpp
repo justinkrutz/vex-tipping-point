@@ -362,7 +362,7 @@ Macro pull_platform(
       button_forward = 20;
       lift_motor.move_absolute(0, 127);
       while (lift_motor.get_position() < 10) {
-        pros::delay(10);
+        wait(10);
       }
     },
     [](){
@@ -424,7 +424,7 @@ void auton_log() {
         // std::to_string(targets.size()) + "," +
         // std::to_string(goal_sensor_one.get_value()) + "," +
         // std::to_string(goal_sensor_two.get_value()));
-    pros::delay(10); 
+    wait(10); 
   }
   
   std::ifstream odl_i("/usd/odom_log_number.txt");
@@ -1380,6 +1380,61 @@ Macro skills(
       // pick up blue goal two
 
       wait_until_final_target_reached();
+    },
+    [](){
+      auton_clean_up();
+    },
+    {&auton_group});
+
+
+    //=============================================================================================//
+    //=============================================================================================//
+    Macro keyan_skills(
+    [](){
+      auton_init({0_in, 0_in, 0_deg});
+
+      move_settings.start_output = 20;
+      move_settings.mid_output = 100;
+      move_settings.end_output = 20;
+
+      turn_settings.mid_output = 30;
+
+      // turn_settings.mid_output = 30;
+      lift::claw.retract();
+      lift::tilter.retract();
+      lift_motor.move_absolute(-10, 100);
+      wait(300);
+
+      // Pick up First goal
+      add_target(-6_in, 0_deg);
+      wait_until_final_target_reached();
+      lift::tilter.extend();
+      wait(300);
+      //end
+
+      // Pick up 2nd goal
+      add_target(100_deg);
+      wait_until_final_target_reached();
+      move_settings.mid_output = 80;
+      add_target(42_in, 100_deg);
+      wait_until_final_target_reached();
+      lift::claw.extend();
+      wait(300);
+      //end
+
+      move_settings.mid_output = 100;
+
+      //put yellow goal 1 on platform
+      add_target(145_deg);
+      wait_until_final_target_reached();
+      add_target(36_in, 145_deg);
+      wait_until_final_target_reached();
+      add_target(90_deg);
+      wait_until_final_target_reached();
+      add_target(24_in, 90_deg);
+      wait_until_final_target_reached();
+      //end
+
     },
     [](){
       auton_clean_up();
