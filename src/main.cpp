@@ -11,7 +11,7 @@
 #include "lift.h"
 
 
-
+bool debug = true;
 bool menu_enabled = true;
 bool open_claw_on_start = false;
 bool auton_has_run = false;
@@ -122,18 +122,17 @@ void opcontrol() {
   } else {
     // odomutilities::errorcorrection::auto_goal_center = false;
   }
-  controllermenu::partner_print_array[0] = "test";
 
   Controller okapi_master;
 
-
+  int i = 0;
   while (true) {
     // Arcade drive with the left stick
     chassis->getModel()->arcade(okapi_master.getAnalog(ControllerAnalog::rightY),
                                okapi_master.getAnalog(ControllerAnalog::rightX));
 
     controllerbuttons::run_buttons();
-    if (!menu_enabled) {
+    if (!menu_enabled && debug) {
       // QLength imu_x = imu_odom->getState().x;
       // QLength imu_y = imu_odom->getState().y;
       // QAngle imu_theta = imu_odom->getState().theta;
@@ -144,20 +143,9 @@ void opcontrol() {
       QLength x = chassis->getState().x;
       QLength y = chassis->getState().y;
       QAngle theta = chassis->getState().theta;
-      controllermenu::partner_print_array[0] = std::to_string(tracker_left.get_position())  + " " + std::to_string(x.convert(inch));
-      controllermenu::partner_print_array[1] = std::to_string(tracker_right.get_position()) + " " + std::to_string(y.convert(inch));
-      controllermenu::partner_print_array[2] = std::to_string(tracker_back.get_position())  + " " + std::to_string(theta.convert(degree));
-      
-      // controllermenu::master_print_array[0] = std::to_string(optical_sensor.get_raw().red)   + " " + std::to_string(optical_sensor.get_rgb().red);
-      // controllermenu::master_print_array[1] = std::to_string(optical_sensor.get_hue());
-      // controllermenu::master_print_array[2] = std::to_string(optical_sensor.get_saturation())  + " " + std::to_string(optical_sensor.get_proximity());
-      // controllermenu::master_print_array[1] = std::to_string(distance_sensor_left.get())  + " " + std::to_string(distance_sensor_left.get_confidence());
-      // controllermenu::master_print_array[2] = std::to_string(distance_sensor_right.get())  + " " + std::to_string(distance_sensor_right.get_confidence());
-      
-      // controllermenu::partner_print_array[0] = std::to_string(optical_sensor.get_raw().clear) + " " + std::to_string(optical_sensor.get_proximity());
-      // controllermenu::partner_print_array[1] = std::to_string(optical_sensor.get_rgb().brightness);
-      // controllermenu::partner_print_array[2] = std::to_string(optical_sensor.get_hue()) + " " + std::to_string(optical_sensor.get_saturation());
-      // controllermenu::master_print_array[1] = std::to_string(imu.get_rotation());
+      controllermenu::master_print_array[0] = std::to_string(x.convert(inch));
+      controllermenu::master_print_array[1] = std::to_string(y.convert(inch));
+      controllermenu::master_print_array[2] = std::to_string(theta.convert(degree)) + " " + std::to_string(imu.get_heading());
     }
     pros::delay(10);
   }
