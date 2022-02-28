@@ -36,6 +36,13 @@ void set_drive_callbacks() {
  */
 
 void initialize() {
+  Logger::setDefaultLogger(
+    std::make_shared<Logger>(
+        TimeUtilFactory::createDefault().getTimer(), // It needs a Timer
+        "/ser/sout", // Output to the PROS terminal
+        Logger::LogLevel::warn // Show errors and warnings
+    )
+);
   // lift_gripper.set_value(1);
   build_chassis();
   // odom_init();
