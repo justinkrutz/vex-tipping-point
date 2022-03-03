@@ -27,7 +27,7 @@ void build_chassis() {
       {-8, 9, -10}
     )
     // wheel size is 4.1797_in times 3/7 gear ratio
-    .withDimensions({AbstractMotor::gearset::blue}, {{0.142939386978, 14.2739608613}, imev5BlueTPR})
+    .withDimensions({AbstractMotor::gearset::blue}, {{2518.55004847, 6.19911541924}, imev5BlueTPR})
     .withOdometry()
     .buildOdometry();
 
