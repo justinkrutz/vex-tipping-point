@@ -317,6 +317,7 @@ void create_folder_structure() {
       new MenuAutonomous("right_yellow_win_point", autonroutines::right_yellow_win_point),
       new MenuFolder("Unused", {
         new MenuAutonomous("None", autonroutines::none),
+        new MenuAutonomous("keyan_skills", autonroutines::keyan_skills),
         new MenuAutonomous("One Side", autonroutines::one_side),
         new MenuAutonomous("Point and Shoot", autonroutines::point_and_shoot),
         new MenuAutonomous("Point and Plus Sensor", autonroutines::point_and_plus),
