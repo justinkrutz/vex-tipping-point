@@ -121,7 +121,7 @@ void set_callbacks() {
   button_handler.master.l1.released.set([&](){ lift_motor = 0; });
   button_handler.master.l2.pressed .set([&](){ lift_motor = -127; });
   button_handler.master.l2.released.set([&](){ lift_motor = 0; });
-  button_handler.master.left.pressed.set([&](){ lift_motor.move_absolute(250, 40); }); // set down tall goal on end of platform
+  button_handler.master.left.pressed.set([&](){ lift_motor.move_absolute(230, 40); }); // set down tall goal on end of platform
 }
 
 } // namespace lift
