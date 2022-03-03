@@ -72,7 +72,7 @@ void initialize() {
 void disabled() {
   open_claw_on_start = true;
   autondrive::auton_group.terminate();
-  // odomutilities::errorcorrection::auto_goal_center = true;
+  // odomutilities::errorcorrection::gps_allign = true;
 }
 
 /**
@@ -127,7 +127,7 @@ void opcontrol() {
   if (pros::competition::is_connected()) {
     set_drive_callbacks();
   } else {
-    // odomutilities::errorcorrection::auto_goal_center = false;
+    // odomutilities::errorcorrection::gps_allign = false;
   }
 
   Controller okapi_master;

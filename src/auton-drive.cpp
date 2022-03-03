@@ -444,18 +444,19 @@ void auton_log() {
 }
 
 void auton_init(OdomState odom_state, std::string name = "unnamed", bool is_skills = false) {
+  chassis->setState(odom_state);
   // imu_odom->setState(odom_state);
-  int flip = 1;
-  QAngle theta_offset = 180_deg;
-  if (!is_blue){
-    flip = -1;
-    theta_offset = 0_deg;
-  }
-  auto x     = odom_state.x.convert(meter) * flip;
-  auto y     = odom_state.y.convert(meter) * flip;
-  auto theta = odom_state.theta.convert(degree);
-  gps.set_position(x, y, theta);
-  imu.set_rotation(theta);
+  // int flip = 1;
+  // QAngle theta_offset = 180_deg;
+  // if (!is_blue){
+  //   flip = -1;
+  //   theta_offset = 0_deg;
+  // }
+  // auto x     = odom_state.x.convert(meter) * flip;
+  // auto y     = odom_state.y.convert(meter) * flip;
+  // auto theta = odom_state.theta.convert(degree);
+  // gps.set_position(x, y, theta);
+  // imu.set_rotation(theta);
   start_time = pros::millis();
   auton_drive_enabled = true;
   (pros::Task(auton_log));
@@ -1381,6 +1382,21 @@ Macro skills(
       // pick up blue goal two
 
       wait_until_final_target_reached();
+    },
+    [](){
+      auton_clean_up();
+    },
+    {&auton_group});
+
+    Macro okapi_test(
+    [](){
+      auton_init({0_in, 0_in, 0_deg});
+      chassis->driveToPoint({10_in, 10_in});
+      chassis->driveToPoint({0_in, 0_in});
+      chassis->turnToAngle(0_deg);
+      chassis->moveDistance(10_in);
+      chassis->turnToPoint({10_in, 10_in});
+
     },
     [](){
       auton_clean_up();

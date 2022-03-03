@@ -67,6 +67,7 @@ extern controllerbuttons::Macro skills2;
 extern controllerbuttons::Macro point_and_plus_4;
 extern controllerbuttons::Macro shawnton_4_0;
 extern controllerbuttons::Macro right_yellow_win_point;
+extern controllerbuttons::Macro okapi_test;
 
 } // namespace autonroutines
 

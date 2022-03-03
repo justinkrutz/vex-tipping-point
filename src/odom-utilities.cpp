@@ -1,10 +1,10 @@
-// #include "main.h"
-// #include "robot-config.h"
-// #include "robot-functions.h"
-// #include "odom-utilities.h"
-// #include "auton-drive.h"
-// #include "controller-menu.h"
-// #include "odometry.h"
+#include "main.h"
+#include "robot-config.h"
+#include "robot-functions.h"
+#include "odom-utilities.h"
+#include "auton-drive.h"
+#include "controller-menu.h"
+#include "odometry.h"
 
 
 // #include <bits/stdc++.h>
@@ -14,7 +14,7 @@
 // #define DEFAULT_GOAL_OFFSET 13_in
 // #define DEFAULT_BALL_OFFSET 10_in
 
-// namespace odomutilities {
+namespace odomutilities {
 
 
 // Goal::Goal(Point point, std::vector<QAngle> angles, GoalType goal_type) : point(point), angles(angles), offset(DEFAULT_GOAL_OFFSET), goal_type(goal_type) {
@@ -116,9 +116,9 @@
 //   Point ball_n {117.6361_in, 105.6361_in};
 // }
 
-// namespace errorcorrection {
+namespace errorcorrection {
 
-// using namespace odomutilities;
+using namespace odomutilities;
 
 // Goal *last_goal = &goal_9;
 // Point last_odom_point;
@@ -133,73 +133,30 @@
 // const QLength kGoalOffset = 12.2274_in;
 // const QLength kDetectionDistance = 15_in;
 
-// bool auto_goal_center;
+bool gps_allign;
 
-// void loop() {
-//   while (true) {
-//     // bool goal_sensor_triggered = goal_os.get_new_found();
-//     // bool goal_sensor_released = goal_os.get_new_lost();
+void loop() {
+  while (true) {
+    pros::delay(5);
+    if (!gps_allign) continue;
 
-//     // if (goal_sensor_triggered) {
-//     //   waiting = true;
-//     //   time_triggered = pros::millis();
-//     //   // if (auto_goal_center) autondrive::goal_center.start();
-//     // }
+    auto odom = chassis->getState();
+    auto gps_pos = gps.get_status();
+    QAngle gps_theta = gps_pos.pitch * degree;
+    QLength gps_x = gps_pos.x * inch;
+    QLength gps_y = gps_pos.y * inch;
+    if ((gps_x - odom.x).abs() < 30_in
+        && (gps_y - odom.y).abs() < 30_in
+        && (gps_theta - odom.theta).abs() < 20_deg) {
+      chassis->setState({gps_x, gps_y, gps_theta});
+    }
+    // imu_odom->setState({gps_x, gps_y, gps_theta});
+}
 
-//     // if (waiting && pros::millis() - time_triggered > kWaitTime) {
-//     //   waiting = false;
-//     //   if (goal_os.is_detected) {
-//     //     OdomState odom = imu_odom->getState();
-//     //     QLength offset_x = odom.x + cos(odom.theta) * kGoalOffset;
-//     //     QLength offset_y = odom.y + sin(odom.theta) * kGoalOffset;
-        
-//     //     Goal *closest_goal = Goal::closest({odom.x, odom.y});
-//     //     // Point last_goal_point = last_goal->point;
-//     //     Point closest_goal_point = closest_goal->point;
+void start() {
+  pros::Task task(loop);
+}
 
-//     //     QLength distance_to_goal = OdomMath::computeDistanceToPoint(closest_goal_point, {offset_x, offset_y, odom.theta});
-//     //     if (distance_to_goal > kDetectionDistance) {
-//     //       continue;
-//     //     }
+} // namespace errorcorrection
 
-
-//     //     if (!first_goal_reached) {
-//     //       first_goal_reached = true;
-//     //       last_goal = closest_goal;
-//     //       last_odom_point = {offset_x, offset_y};
-//     //     } else if (closest_goal_point.x != last_goal->point.x || closest_goal_point.y != last_goal->point.y) {
-//     //       QAngle desired_angle = OdomMath::computeAngleToPoint(closest_goal_point, {last_goal->point.x, last_goal->point.y, 0_deg});
-//     //       Point measured_point = {offset_x, offset_y};
-//     //       QAngle measured_angle = OdomMath::computeAngleToPoint(measured_point, {last_odom_point.x, last_odom_point.y, 0_deg});
-//     //       // controllermenu::partner_print_array[0] = "d " + std::to_string(desired_angle.convert(degree)) + " x " + std::to_string(offset_x.convert(inch));
-//     //       // controllermenu::partner_print_array[1] = "m " + std::to_string(measured_angle.convert(degree)) + " y " + std::to_string(offset_y.convert(inch));
-
-//     //       QAngle error = mod(measured_angle - desired_angle + 180_deg, 360_deg) - 180_deg;
-
-//     //       QAngle new_theta = odom.theta - error;
-//     //       QLength new_x = closest_goal_point.x - kGoalOffset * cos(new_theta);
-//     //       QLength new_y = closest_goal_point.y - kGoalOffset * sin(new_theta);
-//     //       // controllermenu::partner_print_array[2] = "e " + std::to_string(error.convert(degree));
-//     //       if ((new_x - odom.x).abs() < 30_in
-//     //            && (new_y - odom.y).abs() < 30_in
-//     //            && (new_theta - odom.theta).abs() < 20_deg) {
-//     //         last_goal = closest_goal;
-//     //         last_odom_point = closest_goal->point;
-//     //         // chassis->setState({new_x, new_y, new_theta});
-//     //         imu_odom->setState({new_x, new_y, new_theta});
-//     //       }
-//     //     }
-//     //   }
-//     // }
-//     pros::delay(5);
-//   }
-
-// }
-
-// void start() {
-//   pros::Task task(loop);
-// }
-
-// } // namespace errorcorrection
-
-// } // namespace odomutilities
+} // namespace odomutilities
