@@ -253,6 +253,8 @@ void motor_task()
     
     int stick_forward = input_curve(master.get_analog(ANALOG_RIGHT_Y));
     int stick_turn = input_curve(master.get_analog(ANALOG_RIGHT_X));
+    // int stick_forward = master.get_analog(ANALOG_RIGHT_Y);
+    // int stick_turn = master.get_analog(ANALOG_RIGHT_X);
     // controllermenu::master_print_array[1] = std::to_string(stick_forward);
     // controllermenu::master_print_array[2] = std::to_string(stick_turn);
     std::string x_str = std::to_string(int(get_odom_state().x.convert(inch)*100));
