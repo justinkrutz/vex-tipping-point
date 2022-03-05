@@ -15,6 +15,15 @@ while (!(condition) && pros::millis() - wait_until_timeout_start < timeout) { \
 }
 
 namespace autondrive {
+
+enum DriveState {
+  kDisabled,
+  kOkapi,
+  kLegacy
+};
+
+extern DriveState drive_state;
+
 extern controllerbuttons::MacroGroup auton_group;
 extern controllerbuttons::MacroGroup drive_group;
 
@@ -29,8 +38,12 @@ class Target {
   QAngle theta = 0_deg;
   OdomState starting_state;
   bool hold;
+
+  bool is_legacy;
   bool is_turn;
+
   int millis_at_start;
+  int timeout;
 
   bool is_new = true;
   void init_if_new();
@@ -53,21 +66,10 @@ void set_callbacks();
 namespace autonroutines {
 
 extern controllerbuttons::Macro none;
-extern controllerbuttons::Macro test;
-extern controllerbuttons::Macro left_side_rings;
-extern controllerbuttons::Macro blue_wp;
-extern controllerbuttons::Macro one_side;
-extern controllerbuttons::Macro point_and_shoot;
-extern controllerbuttons::Macro point_and_plus;
-extern controllerbuttons::Macro point_and_plus_old;
-extern controllerbuttons::Macro right_side_two;
-extern controllerbuttons::Macro point_and_plus_fast;
-extern controllerbuttons::Macro skills;
-extern controllerbuttons::Macro skills2;
-extern controllerbuttons::Macro point_and_plus_4;
-extern controllerbuttons::Macro shawnton_4_0;
-extern controllerbuttons::Macro right_yellow_win_point;
+extern controllerbuttons::Macro skills_3;
+extern controllerbuttons::Macro legacy_test;
 extern controllerbuttons::Macro okapi_test;
+extern controllerbuttons::Macro profiling_test;
 
 } // namespace autonroutines
 

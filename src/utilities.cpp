@@ -25,6 +25,10 @@ int pct_to_velocity(pros::Motor &motor) {
   }
 }
 
+int input_curve(int input, double power, double range) {
+  return pow(abs(input)/range, power)*range*sgn(input);
+}
+
 int rampMath(double input, double total_range, RampMathSettings s) {
   input = fabs(input);
   int sign = sgn(total_range);

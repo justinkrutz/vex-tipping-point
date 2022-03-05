@@ -28,6 +28,8 @@ class SlewGroup {
 
 int pct_to_velocity(pros::Motor &motor);
 
+int input_curve(int input, double power=1.8, double range=127);
+
 template <typename T> int sgn(T &&val) {
   if (val < 0) {
     return -1;

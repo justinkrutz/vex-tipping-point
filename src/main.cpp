@@ -42,15 +42,15 @@ void initialize() {
         "/ser/sout", // Output to the PROS terminal
         Logger::LogLevel::warn // Show errors and warnings
     )
-);
+  );
   // lift_gripper.set_value(1);
   build_chassis();
-  // odom_init();
+  odom_init();
   // chassis->setState({13.491_in, 34.9911_in, 0_deg});
   // chassis->setState({15.7416_in, 31.4911_in, -90_deg});
   // imu_odom->setState({15.7416_in, 31.4911_in, -90_deg});
   // optical_sensor.set_led_pwm(100);
-  // pros::Task(autondrive::motor_task); // TODO: Uncoment this!
+  pros::Task(autondrive::motor_task);
   lift::set_callbacks();
   // robotfunctions::set_callbacks();
   // ballsystem::set_callbacks();
@@ -130,29 +130,24 @@ void opcontrol() {
     // odomutilities::errorcorrection::gps_allign = false;
   }
 
-  Controller okapi_master;
-
   int i = 0;
   while (true) {
-    // Arcade drive with the left stick
-    chassis->getModel()->arcade(okapi_master.getAnalog(ControllerAnalog::rightY),
-                               okapi_master.getAnalog(ControllerAnalog::rightX));
-
     controllerbuttons::run_buttons();
     if (!menu_enabled && debug) {
-      // QLength imu_x = imu_odom->getState().x;
-      // QLength imu_y = imu_odom->getState().y;
-      // QAngle imu_theta = imu_odom->getState().theta;
-      // controllermenu::master_print_array[0] = std::to_string(tracker_left.get_position())  + " " + std::to_string(imu_x.convert(inch));
-      // controllermenu::master_print_array[1] = std::to_string(tracker_right.get_position()) + " " + std::to_string(imu_y.convert(inch));
-      // controllermenu::master_print_array[2] = std::to_string(tracker_back.get_position())  + " " + std::to_string(imu_theta.convert(degree));
+      auto imu_state = imu_odom->getState();
+      // controllermenu::partner_print_array[0] = std::to_string(imu_x.convert(inch)) + " " + std::to_string(gps.get_error());
+      // controllermenu::partner_print_array[1] = std::to_string(imu_y.convert(inch)) + " " + std::to_string(gps.get_heading());
+      // controllermenu::partner_print_array[2] = std::to_string(imu_theta.convert(degree)) + " " + std::to_string(imu.get_heading());
+      // controllermenu::partner_print_array[2] = std::to_string(gps.get_error()) + " " + std::to_string(imu.get_heading());
       
-      QLength x = chassis->getState().x;
-      QLength y = chassis->getState().y;
-      QAngle theta = chassis->getState().theta;
-      controllermenu::master_print_array[0] = std::to_string(x.convert(inch));
-      controllermenu::master_print_array[1] = std::to_string(y.convert(inch));
-      controllermenu::master_print_array[2] = std::to_string(theta.convert(degree)) + " " + std::to_string(imu.get_heading());
+      // auto odom = chassis->getState();
+      auto gps_pos = gps.get_status();
+      auto gps_theta = gps_pos.yaw;
+      auto gps_x = gps_pos.x;
+      auto gps_y = gps_pos.y;
+      controllermenu::master_print_array[0] = std::to_string(imu_state.x.convert(inch)) + " " + std::to_string(gps_x);
+      controllermenu::master_print_array[1] = std::to_string(imu_state.y.convert(inch)) + " " + std::to_string(gps_y);
+      controllermenu::master_print_array[2] = std::to_string(imu_state.theta.convert(degree)) + " " + std::to_string(gps_theta);
     }
     pros::delay(10);
   }

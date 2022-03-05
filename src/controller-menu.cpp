@@ -307,25 +307,11 @@ MenuAutonomous &selected_auton = default_auton;
 
 void create_folder_structure() {
   root_folder = new MenuFolder("", {
+      new MenuAutonomous("Skills 3.0", autonroutines::skills_3),
+      new MenuAutonomous("Legacy Test", autonroutines::legacy_test),
       new MenuAutonomous("Okapi Test", autonroutines::okapi_test),
+      new MenuAutonomous("Profiling Test", autonroutines::profiling_test),
       new MenuFolder("Pre-Okapi", {
-        new MenuAutonomous("Shawnton 4.0", autonroutines::shawnton_4_0),
-        new MenuAutonomous("Both Sides", autonroutines::blue_wp),
-        new MenuAutonomous("Skills", autonroutines::skills),
-        new MenuAutonomous("Skills2", autonroutines::skills2),
-        new MenuAutonomous("Right Side Two", autonroutines::right_side_two),
-        new MenuAutonomous("Point and Plus Fast", autonroutines::point_and_plus_fast),
-        new MenuAutonomous("Left Side Rings", autonroutines::left_side_rings),
-        new MenuAutonomous("right_yellow_win_point", autonroutines::right_yellow_win_point),
-        new MenuFolder("Unused", {
-          new MenuAutonomous("None", autonroutines::none),
-          new MenuAutonomous("One Side", autonroutines::one_side),
-          new MenuAutonomous("Point and Shoot", autonroutines::point_and_shoot),
-          new MenuAutonomous("Point and Plus Sensor", autonroutines::point_and_plus),
-          new MenuAutonomous("Point and Plus Old", autonroutines::point_and_plus_old),
-          new MenuAutonomous("Test", autonroutines::test),
-          new MenuAutonomous("point_and_plus_4", autonroutines::point_and_plus_4),
-        })
       })
     // new MenuAutonomous("Home Row Three", autonroutines::home_row_three),
     // new MenuAutonomous("ShawnTon 3.0", autonroutines::shawnton_three),

@@ -13,6 +13,10 @@
 
 // #define DEFAULT_GOAL_OFFSET 13_in
 // #define DEFAULT_BALL_OFFSET 10_in
+#define GPS_X_RATE 0.1
+#define GPS_Y_RATE 0.1
+#define GPS_THETA_RATE 1
+#define GPS_ERROR_THRESHOLD 0.05
 
 namespace odomutilities {
 
@@ -38,15 +42,20 @@ namespace odomutilities {
 //   return closest_goal;
 // }
 
-// Goal goal_1 ({  5.8129_in,   5.8129_in}, {225_deg}, GoalType::kCorner);
-// Goal goal_2 ({  5.9272_in,  70.3361_in}, {180_deg}, GoalType::kSide);
-// Goal goal_3 ({  5.8129_in, 134.8593_in}, {135_deg}, GoalType::kCorner);
-// Goal goal_4 ({ 70.3361_in,   5.9272_in}, {270_deg}, GoalType::kSide);
-// Goal goal_5 ({ 70.3361_in,  70.3361_in}, {  0_deg, 90_deg, 180_deg, 270_deg}, GoalType::kCenter);
-// Goal goal_6 ({ 70.3361_in, 134.7450_in}, { 90_deg}, GoalType::kSide);
-// Goal goal_7 ({134.8593_in,   5.8129_in}, {315_deg}, GoalType::kCorner);
-// Goal goal_8 ({134.7450_in,  70.3361_in}, {  0_deg}, GoalType::kSide);
-// Goal goal_9 ({134.8593_in, 134.8593_in}, { 45_deg}, GoalType::kCorner);
+// Point goal_1 = {40.9_in,  11.4_in};
+// Point goal_2 = {129.2_in, 35_in};
+// Point goal_3 = {35_in,    70.3_in};
+// Point goal_4 = {70.3_in,  70.3_in};
+// Point goal_5 = {105.7_in, 70.3_in};
+// Point goal_6 = {11.4_in,  105.7_in};
+// Point goal_7 = {99.8_in,  129.2_in};
+Point goal_1 = {40.9_in,  129.2_in};
+Point goal_2 = {129.2_in, 105.7_in};
+Point goal_3 = {35_in,    70.3_in};
+Point goal_4 = {70.3_in,  70.3_in};
+Point goal_5 = {105.7_in, 70.3_in};
+Point goal_6 = {11.4_in,  35_in};
+Point goal_7 = {99.8_in,  11.4_in};
 
 
 // /*        MATCH SETUP
@@ -133,24 +142,35 @@ using namespace odomutilities;
 // const QLength kGoalOffset = 12.2274_in;
 // const QLength kDetectionDistance = 15_in;
 
-bool gps_allign;
+bool gps_allign = true;
 
 void loop() {
+  gps.set_data_rate(5);
+  Slew gps_x_slew(GPS_X_RATE);
+  Slew gps_y_slew(GPS_Y_RATE);
+  Slew gps_theta_slew(GPS_THETA_RATE);
+
   while (true) {
     pros::delay(5);
     if (!gps_allign) continue;
 
-    auto odom = chassis->getState();
-    auto gps_pos = gps.get_status();
-    QAngle gps_theta = gps_pos.pitch * degree;
-    QLength gps_x = gps_pos.x * inch;
-    QLength gps_y = gps_pos.y * inch;
-    if ((gps_x - odom.x).abs() < 30_in
-        && (gps_y - odom.y).abs() < 30_in
-        && (gps_theta - odom.theta).abs() < 20_deg) {
-      chassis->setState({gps_x, gps_y, gps_theta});
+    double headings [2] = {0, 180};
+    for (auto && offset_deg : headings) {
+      auto odom = chassis->getState();
+      auto gps_pos = gps.get_status();
+      double gps_offset_yaw = (int((gps_pos.yaw + offset_deg)*1000) % 360000)/1000.0;
+      controllermenu::partner_print_array[int(offset_deg)/180] = std::to_string(gps_offset_yaw);
+      QAngle gps_theta = gps_theta_slew.new_value(gps_offset_yaw) * degree;
+      QLength gps_x = gps_x_slew.new_value(gps_pos.x) * inch;
+      QLength gps_y = gps_y_slew.new_value(gps_pos.y) * inch;
+      if (gps.get_error() < GPS_ERROR_THRESHOLD && (gps_x - odom.x).abs() < 30_in
+          && (gps_y - odom.y).abs() < 30_in
+          && (gps_theta - odom.theta).abs() < 20_deg) {
+        chassis->setState({gps_x, gps_y, gps_theta});
+        imu_odom->setState({gps_x, gps_y, gps_theta});
+      }
     }
-    // imu_odom->setState({gps_x, gps_y, gps_theta});
+  }
 }
 
 void start() {

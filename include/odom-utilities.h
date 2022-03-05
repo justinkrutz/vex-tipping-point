@@ -1,5 +1,6 @@
 #ifndef ODOM_UTILITIES_H
 #define ODOM_UTILITIES_H
+#include "main.h"
 
 
 namespace odomutilities {
@@ -19,82 +20,34 @@ namespace odomutilities {
 //   static std::vector<Goal*> goals;
 // };
 
-// extern Goal goal_1;
-// extern Goal goal_2;
-// extern Goal goal_3;
-// extern Goal goal_4;
-// extern Goal goal_5;
-// extern Goal goal_6;
-// extern Goal goal_7;
-// extern Goal goal_8;
-// extern Goal goal_9;
+extern Point goal_1;
+extern Point goal_2;
+extern Point goal_3;
+extern Point goal_4;
+extern Point goal_5;
+extern Point goal_6;
+extern Point goal_7;
 
-// /*        MATCH SETUP
-//    │                       │
-//    └───────────────────────┘
-// ┌─────────────────────────────┐
-// │                             │
-// │──────────────╩──────────────│
-// │                             │
-// │                             │
-// │                             │
-// │4═════D═════E═5═F═════G═════6│
-// │              C              │
-// │                             │
-// │                             │
-// │──A───────────╦───────────B──│
-// │1             2             3│
-// └─────────────────────────────┘
-//    ┌───────────────────────┐
-//    │                       │
-// */
+/*        MATCH SETUP
+   │                       │
+   └───────────────────────┘
+┌─────────────────────────────┐
+│                             │
+│──────────────╩──────────────│
+│                             │
+│                             │
+│                             │
+│4═════D═════E═5═F═════G═════6│
+│              C              │
+│                             │
+│                             │
+│──A───────────╦───────────B──│
+│1             2             3│
+└─────────────────────────────┘
+   ┌───────────────────────┐
+   │                       │
+*/
 
-// namespace matchballs {
-//   extern Point ball_a;
-//   extern Point ball_b;
-//   extern Point ball_c;
-//   extern Point ball_d;
-//   extern Point ball_e;
-//   extern Point ball_f;
-//   extern Point ball_g;
-// }
-
-// /*       SKILLS SETUP
-//    │                       │
-//    └───────────────────────┘
-// ┌──────────────╦──────────────┐
-// │7             8             9│
-// │──────M───────╩───────N──────│
-// │K                           L│
-// │              J              │
-// │                             │
-// │4═══F════G════5════H════I═══6│
-// │                             │
-// │              E              │
-// │C                           D│
-// │──────A───────╦───────B──────│
-// │1             2             3│
-// └──────────────╩──────────────┘
-//    ┌───────────────────────┐
-//    │                       │
-// */
-
-// namespace skillsballs {
-//   extern Point ball_a;
-//   extern Point ball_b;
-//   extern Point ball_c;
-//   extern Point ball_d;
-//   extern Point ball_e;
-//   extern Point ball_f;
-//   extern Point ball_g;
-//   extern Point ball_h;
-//   extern Point ball_i;
-//   extern Point ball_j;
-//   extern Point ball_k;
-//   extern Point ball_l;
-//   extern Point ball_m;
-//   extern Point ball_n;
-}
 
 namespace errorcorrection {
 

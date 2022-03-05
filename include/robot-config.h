@@ -4,7 +4,7 @@
 #include "main.h"
 
 extern std::shared_ptr<OdomChassisController> chassis;
-extern std::shared_ptr<SkidSteerModel> skid_model;
+extern std::shared_ptr<AsyncMotionProfileController> profileController;
 
 extern pros::Controller master;
 extern pros::Controller partner;
