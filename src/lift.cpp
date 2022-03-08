@@ -62,11 +62,11 @@ class MotorToggle {
       is_moving = false;
     } else {
       if (is_forward) {
-        motor.move_velocity(-400);
+        motor.move_velocity(-600);
         is_moving = true;
         was_forward = true;
       } else {
-        motor.move_velocity(400);
+        motor.move_velocity(600);
         is_moving = true;
         was_forward = false;
       }
@@ -87,9 +87,35 @@ bool auto_grip_enabled = true;
 bool auto_grip_ready = true;
 bool goal_auto_gripped = false;
 
+
+using namespace controllerbuttons;
+
+Macro goal_button_pressed(
+    [](){
+      controllermenu::master_print_array[2] = "goal_button_pressed";
+      auto_grip_ready = true;
+      wait(200);
+      controllermenu::master_print_array[1] = "retracted";
+      claw.retract();
+    },[](){
+    });
+
+void goal_button_released() {
+  goal_button_pressed.terminate();
+  if(goal_auto_gripped)
+  {
+    claw.extend();
+    goal_auto_gripped = false;
+  } else {
+    claw.toggle();
+  }
+  auto_grip_ready = false; 
+}
+
 void task_function() {
   while (true) {
     if (auto_grip_enabled && auto_grip_ready && goal_sensor.get_new_press() && !claw.piston_out) {
+      goal_button_pressed.terminate();
       claw.extend();
       goal_auto_gripped = true;
     }
@@ -98,7 +124,6 @@ void task_function() {
 }
 
 void set_callbacks() {
-  using namespace controllerbuttons;
   // button_handler.master.r1.pressed.set(toggle_grabber);
   // button_handler.master. x.pressed .set([&](){ auto_grip_enabled = true; });
   // button_handler.master. b.pressed .set([&](){ auto_grip_enabled = false; });
@@ -106,8 +131,10 @@ void set_callbacks() {
   // button_handler.master.r2.pressed .set([&](){ tilter.toggle(); });
   button_handler.master. x.pressed .set([&](){ auto_grip_enabled = true; });
   button_handler.master. b.pressed .set([&](){ auto_grip_enabled = false; });
-  button_handler.master.r1.released.set([&](){ if(goal_auto_gripped){claw.extend(); goal_auto_gripped = false;} else { claw.toggle();} auto_grip_ready = false; });
-  button_handler.master.r1.pressed .set([&](){ auto_grip_ready = true; });
+  // button_handler.master.r1.released.set([&](){ if(goal_auto_gripped){claw.extend(); goal_auto_gripped = false;} else { claw.toggle();} auto_grip_ready = false; });
+  // button_handler.master.r1.pressed .set([&](){ auto_grip_ready = true; });
+  button_handler.master.r1.pressed .set_macro(goal_button_pressed);
+  button_handler.master.r1.released.set(goal_button_released);
   button_handler.master.r2.pressed .set([&](){ tilter.toggle(); });
   // button_handler.master.r2.pressed.set_macro();
 
@@ -121,7 +148,7 @@ void set_callbacks() {
   button_handler.master.l1.released.set([&](){ lift_motor = 0; });
   button_handler.master.l2.pressed .set([&](){ lift_motor = -127; });
   button_handler.master.l2.released.set([&](){ lift_motor = 0; });
-  button_handler.master.left.pressed.set([&](){ lift_motor.move_absolute(200, 40); }); // set down tall goal on end of platform
+  button_handler.master.left.pressed.set([&](){ lift_motor.move_absolute(220, 40); }); // set down tall goal on end of platform
 }
 
 } // namespace lift
