@@ -121,10 +121,12 @@ void update_legacy() {
   QAngle total_angle = target.theta - target.starting_state.theta;
 
 
-  if (distance_traveled >= total_distance) {
+  controllermenu::master_print_array[1] = std::to_string(total_distance.convert(inch)) + " " + std::to_string(distance_traveled.convert(inch));
+  if (distance_traveled >= total_distance || abs(cos(direction.convert(radian))) < 0.1) {
     target_distance_reached = true;
   }
 
+  controllermenu::master_print_array[2] = "turn_diff: " + std::to_string(abs((get_odom_state().theta - target_state.theta).convert(degree)));
   if (abs(get_odom_state().theta - target_state.theta) < 2.5_deg) {
     target_heading_reached = true;
   }
@@ -143,12 +145,13 @@ void update_legacy() {
   } 
   
   if (target_distance_reached && target.hold) {
-    move_speed = std::min(100.0, 2 * distance_to_target.convert(inch));
+    move_speed = 0;
+    // move_speed = std::min(100.0, 2 * distance_to_target.convert(inch));
   } else {
     move_speed = rampMath(distance_traveled.convert(inch), total_distance.convert(inch), move_settings);
-    if (abs(distance_traveled - total_distance) > 5_in) {
-      strafe_speed  = 2 * sin(direction.convert(radian));
-    }
+    // if (abs(distance_traveled - total_distance) > 5_in) {
+    //   // strafe_speed  = 2 * sin(direction.convert(radian));
+    // }
   }
 
   if (target_heading_reached && target.hold) {
@@ -159,6 +162,7 @@ void update_legacy() {
 
   forward = move_speed * cos(direction.convert(radian));
   // strafe  = strafe_speed;
+  strafe  = 0;
   turn    = turn_speed;
 }
 
@@ -246,8 +250,8 @@ void motor_task()
 
     if (drive_state == DriveState::kLegacy) {
       update_legacy();
-      double left_drive  = (forward + turn + strafe)/100.0;
-      double right_drive = (forward - turn - strafe)/100.0;
+      double left_drive  = (forward + turn)/100.0;
+      double right_drive = (forward - turn)/100.0;
       // double left_drive  = 1.27 * (forward + turn);
       // double right_drive = 1.27 * (forward - turn);
       chassis->getModel()->left(left_drive);
@@ -526,6 +530,8 @@ Macro legacy_test(
       turn_settings.start_output = 7;
       turn_settings.mid_output = 15;
       turn_settings.end_output = 7;
+
+    
 
       // turn_settings.mid_output = 30;
       lift::claw.retract();
