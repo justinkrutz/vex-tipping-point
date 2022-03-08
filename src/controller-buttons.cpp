@@ -64,7 +64,7 @@ void Macro::start() {
 }
 
 void Macro::terminate() {
-  controllermenu::master_print_array[1] = "Macro::terminate";
+  // controllermenu::master_print_array[1] = "Macro::terminate";
 
   for (auto &macro : macros_) {
     if (macro->is_running_) {

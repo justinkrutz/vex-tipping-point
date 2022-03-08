@@ -92,10 +92,10 @@ using namespace controllerbuttons;
 
 Macro goal_button_pressed(
     [](){
-      controllermenu::master_print_array[2] = "goal_button_pressed";
+      // controllermenu::master_print_array[2] = "goal_button_pressed";
       auto_grip_ready = true;
       wait(200);
-      controllermenu::master_print_array[1] = "retracted";
+      // controllermenu::master_print_array[1] = "retracted";
       claw.retract();
     },[](){
     });
