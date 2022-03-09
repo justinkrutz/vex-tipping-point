@@ -145,9 +145,9 @@ void opcontrol() {
       auto gps_theta = gps_pos.yaw;
       auto gps_x = gps_pos.x;
       auto gps_y = gps_pos.y;
-      controllermenu::master_print_array[0] = std::to_string(imu_state.x.convert(inch)) + " " + std::to_string(gps_x);
-      controllermenu::master_print_array[1] = std::to_string(imu_state.y.convert(inch)) + " " + std::to_string(gps_y);
-      controllermenu::master_print_array[2] = std::to_string(imu_state.theta.convert(degree)) + " " + std::to_string(gps_theta);
+      // controllermenu::master_print_array[0] = std::to_string(imu_state.x.convert(inch)) + " " + std::to_string(gps_x);
+      // controllermenu::master_print_array[1] = std::to_string(imu_state.y.convert(inch)) + " " + std::to_string(gps_y);
+      // controllermenu::master_print_array[2] = std::to_string(imu_state.theta.convert(degree)) + " " + std::to_string(gps_theta);
     }
     pros::delay(10);
   }

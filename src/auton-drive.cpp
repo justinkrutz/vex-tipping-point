@@ -63,7 +63,7 @@ RampMathSettings move_settings = {20, 100, 15, 0.1, 0.2};
 RampMathSettings strafe_settings = {10, 50, 10, 0.1, 0.1}; // This is not used
 RampMathSettings turn_settings = {10, 50, 10, 0.1, 0.1}; // This is not used
 double turn_max_speed = 100;
-double turn_p = 20;
+double turn_p = 30;
 
 double forward = 0;
 double strafe  = 0;
@@ -123,18 +123,24 @@ void update_legacy() {
   QAngle total_angle = target.theta - target.starting_state.theta;
 
 
-  controllermenu::master_print_array[1] = std::to_string(total_distance.convert(inch)) + " " + std::to_string(distance_traveled.convert(inch));
+  // controllermenu::master_print_array[1] = std::to_string(total_distance.convert(inch)) + " " + std::to_string(distance_traveled.convert(inch));
   if (distance_traveled >= total_distance || abs(cos(direction.convert(radian))) < 0.1) {
     target_distance_reached = true;
   }
 
-  controllermenu::master_print_array[2] = "turn_diff: " + std::to_string(abs((get_odom_state().theta - target_state.theta).convert(degree)));
+  // controllermenu::master_print_array[2] = "turn_diff: " + std::to_string(abs((get_odom_state().theta - target_state.theta).convert(degree)));
   if (abs(get_odom_state().theta - target_state.theta) < 2.5_deg) {
     target_heading_reached = true;
   }
 
-  if ((target_heading_reached && target_distance_reached)
-      || pros::millis() - target.millis_at_start > target.timeout) {
+  if (pros::millis() - target.millis_at_start > target.timeout) {
+    controllermenu::master_print_array[1] = "TO " + std::to_string(target.timeout);
+
+  }
+
+  // if ((target_heading_reached && target_distance_reached)
+  //     || pros::millis() - target.millis_at_start > target.timeout) {
+  if (target_heading_reached && target_distance_reached) {
     // if (!targets.empty() && !(targets.size() == 1 && target.hold)) {
     if (!targets.empty()) {
       target_heading_reached = false;
@@ -151,9 +157,9 @@ void update_legacy() {
     // move_speed = std::min(100.0, 2 * distance_to_target.convert(inch));
   } else {
     move_speed = rampMath(distance_traveled.convert(inch), total_distance.convert(inch), move_settings);
-    // if (abs(distance_traveled - total_distance) > 5_in) {
-    //   // strafe_speed  = 2 * sin(direction.convert(radian));
-    // }
+    if (abs(distance_traveled - total_distance) > 5_in) {
+      strafe_speed  = 2 * sin(direction.convert(radian));
+    }
   }
 
   if (target_heading_reached && target.hold) {
@@ -163,8 +169,8 @@ void update_legacy() {
   }
 
   forward = move_speed * cos(direction.convert(radian));
-  // strafe  = strafe_speed;
-  strafe  = 0;
+  strafe  = strafe_speed;
+  // strafe  = 0;
   turn    = turn_speed;
 }
 
@@ -247,8 +253,7 @@ void motor_task()
 
     double forward = button_forward + drivetoposition::forward + stick_forward * 0.787401574803;
     double temp_turn  = stick_turn * 0.787401574803;
-    double turn    = button_turn + drivetoposition::turn + temp_turn;
-    double sync = std::min(1.0, 100 / (fabs(forward) + fabs(turn)));
+    double turn    = button_turn + drivetoposition::turn + temp_turn + strafe;
 
     if (drive_state == DriveState::kLegacy) {
       update_legacy();
@@ -573,10 +578,12 @@ Macro legacy_test(
 
       add_target(goal_3.x, goal_6.y-2_in, 0_deg);
       wait_until_final_target_reached();
-      add_target(goal_6.x, goal_6.y-2_in, 0_deg, back_goal_wall_offset);
       move_settings.mid_output = 20;
+      wait(20);
+      add_target(24_in, goal_6.y-2_in, 0_deg);
+      wait(20);
       wait_until_final_target_reached(2000);
-      add_target(goal_6.x, goal_6.y-2_in, -5_deg, back_goal_wall_offset, 0_deg);
+      add_target(24_in, goal_6.y-2_in, -5_deg);
       lift::tilter.extend();
       wait(300);
       wait_until_final_target_reached();
@@ -590,26 +597,31 @@ Macro legacy_test(
       wait_until_final_target_reached();
       add_target(goal_4.x, goal_6.y-2_in, -90_deg);
       wait_until_final_target_reached();
-      move_settings.mid_output = 20;
+      // move_settings.mid_output = 20;
       add_target(goal_4.x, goal_6.y-4_in, -90_deg);
       ring_motor.move_velocity(ring_speed);
-      wait_until_final_target_reached(1000);
-      move_settings.mid_output = 100;
+      wait_until_final_target_reached(700);
+      // move_settings.mid_output = 100;
       // wait(500);
       lift::claw.retract();
       // drop blue goal 1 on blue platform
 
-      add_target(goal_4.x, goal_6.y-2_in, -90_deg);
-      add_target(goal_4.x, goal_6.y-2_in, 0_deg);
+      // auto state = get_odom_state();
+      // imu_odom->setState({29_in, state.x, state.theta});
+      // //drive into platform
+
+      add_target(goal_4.x, 32_in, -90_deg);
+      add_target(goal_4.x, 32_in, 0_deg);
       wait_until_final_target_reached();
       ring_motor.move_velocity(0);
-      add_target(goal_4.x, goal_6.y-2_in, -5_deg);
-      add_target(8_ft, goal_6.y-4_in, 0_deg);
-      add_target(10_ft+6_in, goal_6.y-4_in, 0_deg);
+      add_target(goal_4.x, 32_in, -15_deg);
+      add_target(8_ft, 30_in, -15_deg);
+      add_target(8_ft, 30_in, 0_deg);
+      add_target(10_ft+6_in, 30_in, 0_deg);
 
       wait_until_final_target_reached();
-      move_settings.mid_output = 20;
-      add_target(14_ft, goal_6.y-2_in, 0_deg);
+      // move_settings.mid_output = 20;
+      add_target(14_ft, 30_in, 0_deg);
       wait_until_final_target_reached(1300);
       wait(100);
       auto state = get_odom_state();
@@ -621,9 +633,11 @@ Macro legacy_test(
       add_target(10_ft, goal_6.y, 0_deg);
       add_target(10_ft, goal_6.y, -90_deg);
       wait_until_final_target_reached();
+      add_target(10_ft, goal_7.y, -90_deg);
+      wait_until_final_target_reached(2000);
       move_settings.mid_output = 20;
-      add_target(10_ft, 0_in, -90_deg);
-      wait_until_final_target_reached(1300);
+      add_target(10_ft, -12_in, -90_deg);
+      wait_until_final_target_reached(2000);
       wait(100);
       state = get_odom_state(); // declared before
       imu_odom->setState({state.x, 8_in, state.theta});
@@ -631,11 +645,11 @@ Macro legacy_test(
       //drive into other wall
 
       add_target(10_ft, goal_6.y, -90_deg);
+      add_target(10_ft, goal_7.y, -90_deg);
+      add_target(10_ft, goal_7.y, -180_deg);
       wait_until_final_target_reached();
       lift_motor.move_absolute(0, 100);
       wait(1000);
-      add_target(10_ft, goal_7.y, -90_deg);
-      add_target(10_ft, goal_7.y, -180_deg);
       wait_until_final_target_reached();
       lift_motor.move_absolute(-10, 100);
       add_target(goal_7, -180_deg, front_goal_offset);
@@ -656,11 +670,11 @@ Macro legacy_test(
 
       add_target(goal_5.x, goal_2.y, -200_deg);
       wait_until_final_target_reached();
-      add_target(goal_5.x, goal_2.y, -200_deg, -44_in);
-      add_target(goal_5.x, goal_2.y, -270_deg, -44_in, -200_deg);
+      add_target(goal_5.x, goal_2.y, -200_deg, -32_in);
+      add_target(goal_5.x, goal_2.y, -270_deg, -32_in, -200_deg);
       wait_until_final_target_reached(4500);
-      // add_target(goal_4.x-12_in, goal_2.y+4_in, -270_deg);
-      wait_until_final_target_reached();
+      add_target(goal_4.x-12_in, goal_2.y+4_in, -270_deg);
+      wait_until_final_target_reached(700);
       move_settings.mid_output = 100;
       // wait(500);
       lift::claw.retract();
@@ -718,47 +732,48 @@ Macro legacy_test(
       // drop red goal 6 on red platform
 
       add_target(goal_4.x, goal_2.y, -270_deg);
-      add_target(goal_4.x, goal_2.y, -180_deg);
+      add_target(goal_4.x, goal_2.y, -360_deg);
       wait_until_final_target_reached();
-      lift::tilter.retract();
-      add_target(goal_2, -180_deg, back_goal_wall_offset);
+      lift_motor.move_absolute(-10, 100);
+      wait(1000);
+      wait_until_final_target_reached();
+      add_target(goal_2, -360_deg, front_goal_offset);
       wait_until_final_target_reached(2000);
-      lift::tilter.extend();
-      wait(300);
+      lift::claw.extend();
+      wait(100);
       // pick up blue goal two
 
-      add_target(goal_4, -180_deg, 49.5_in, -135_deg);
-      add_target(goal_4, -135_deg, front_goal_offset);
+      add_target(goal_4, -360_deg, 49.5_in, -495_deg);
+      add_target(goal_4, -495_deg, front_goal_offset);
       wait_until_final_target_reached();
-      // lift::claw.extend();
-      add_target(goal_6.x, goal_7.y, -135_deg, front_goal_offset);
+      add_target(goal_6.x, goal_7.y, -495_deg, front_goal_offset);
       wait_until_final_target_reached();
-      // lift::claw.retract();
       // push yellow goal 4
     
-      lift_motor.move_absolute(-10, 100);
-      add_target(goal_3.x, goal_6.y, -135_deg);
-      add_target(goal_3.x, goal_6.y, -90_deg);
-      wait(1000);
-      add_target(goal_3.x, goal_7.y, -90_deg, front_goal_offset);
-      wait_until_final_target_reached();
-      lift::claw.extend();
-      wait(200);
-      // pick up yellow goal 3
+      
+      // lift_motor.move_absolute(-10, 100);
+      // add_target(goal_3.x, goal_6.y, -495_deg);
+      // add_target(goal_3.x, goal_6.y, -90_deg);
+      // wait(1000);
+      // add_target(goal_3.x, goal_7.y, -90_deg, front_goal_offset);
+      // wait_until_final_target_reached();
+      // lift::claw.extend();
+      // wait(200);
+      // // pick up yellow goal 3
 
-      lift_motor.move_absolute(360, 100);
-      add_target(goal_3.x, goal_6.y+6_in, -90_deg);
-      add_target(goal_3.x, goal_6.y+6_in, 0_deg);
-      add_target(goal_4.x, goal_6.y+6_in, 0_deg);
-      add_target(goal_4.x, goal_6.y+6_in, -90_deg);
-      wait_until_final_target_reached();
-      move_settings.mid_output = 20;
-      add_target(goal_4.x, goal_6.y-4_in, -90_deg);
-      wait_until_final_target_reached(1000);
-      move_settings.mid_output = 100;
-      // wait(500);
-      lift::claw.retract();
-      add_target(goal_4, -90_deg);
+      // lift_motor.move_absolute(360, 100);
+      // add_target(goal_3.x, goal_6.y+6_in, -90_deg);
+      // add_target(goal_3.x, goal_6.y+6_in, 0_deg);
+      // add_target(goal_4.x, goal_6.y+6_in, 0_deg);
+      // add_target(goal_4.x, goal_6.y+6_in, -90_deg);
+      // wait_until_final_target_reached();
+      // move_settings.mid_output = 20;
+      // add_target(goal_4.x, goal_6.y-4_in, -90_deg);
+      // wait_until_final_target_reached(1000);
+      // move_settings.mid_output = 100;
+      // // wait(500);
+      // lift::claw.retract();
+      // add_target(goal_4, -90_deg);
 
       wait_until_final_target_reached();
     },
