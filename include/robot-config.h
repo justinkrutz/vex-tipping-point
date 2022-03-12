@@ -29,6 +29,7 @@ extern pros::IMU imu;
 extern pros::Distance back_distance;
 extern pros::ADIDigitalIn goal_sensor;
 
+extern pros::ADIDigitalIn reset_button;
 
 // extern okapi::Motor drive_fl (9, false, AbstractMotor::gearset::green, AbstractMotor::encoderUnits::degrees);
 // extern okapi::Motor drive_fr (10, true,  AbstractMotor::gearset::green, AbstractMotor::encoderUnits::degrees);

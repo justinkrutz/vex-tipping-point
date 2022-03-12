@@ -45,6 +45,7 @@ extern controllerbuttons::Macro goal_center;
 } // namespace drivetoposition
 
 
+void reset_button_task();
 void motor_task();
 void set_callbacks();
 } // namespace autondrive
@@ -52,23 +53,29 @@ void set_callbacks();
 
 namespace autonroutines {
 
+extern controllerbuttons::Macro shawnton_4_0;
+extern controllerbuttons::Macro right_yellow_ML;
+extern controllerbuttons::Macro right_yellow_rings;
+extern controllerbuttons::Macro left_side_rings;
+extern controllerbuttons::Macro blue_wp_2;
+extern controllerbuttons::Macro right_side_two;
+
+extern controllerbuttons::Macro kickstand_shawnton_4_0;
+extern controllerbuttons::Macro kickstand_right_yellow_ML;
+extern controllerbuttons::Macro kickstand_right_yellow_rings;
+extern controllerbuttons::Macro kickstand_right_side_two;
+
 extern controllerbuttons::Macro none;
 extern controllerbuttons::Macro test;
-extern controllerbuttons::Macro left_side_rings;
 extern controllerbuttons::Macro blue_wp;
-extern controllerbuttons::Macro blue_wp_2;
 extern controllerbuttons::Macro one_side;
 extern controllerbuttons::Macro point_and_shoot;
 extern controllerbuttons::Macro point_and_plus;
 extern controllerbuttons::Macro point_and_plus_old;
-extern controllerbuttons::Macro right_side_two;
 extern controllerbuttons::Macro point_and_plus_fast;
 extern controllerbuttons::Macro skills;
 extern controllerbuttons::Macro skills2;
 extern controllerbuttons::Macro point_and_plus_4;
-extern controllerbuttons::Macro shawnton_4_0;
-extern controllerbuttons::Macro right_yellow_ML;
-extern controllerbuttons::Macro right_yellow_rings;
 extern controllerbuttons::Macro keyan_skills;
 
 } // namespace autonroutines

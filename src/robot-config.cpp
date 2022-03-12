@@ -27,6 +27,8 @@ pros::IMU imu(13);
 pros::Distance back_distance(14);
 pros::ADIDigitalIn goal_sensor('g');
 
+pros::ADIDigitalIn reset_button('C');
+
 // okapi::Motor drive_fl (9, false, AbstractMotor::gearset::green, AbstractMotor::encoderUnits::degrees);
 // okapi::Motor drive_fr (10, true,  AbstractMotor::gearset::green, AbstractMotor::encoderUnits::degrees);
 // okapi::Motor drive_bl (1, false, AbstractMotor::gearset::green, AbstractMotor::encoderUnits::degrees);

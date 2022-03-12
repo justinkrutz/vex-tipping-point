@@ -43,6 +43,7 @@ void initialize() {
   // chassis->setState({15.7416_in, 31.4911_in, -90_deg});
   // imu_odom->setState({15.7416_in, 31.4911_in, -90_deg});
   // optical_sensor.set_led_pwm(100);
+  pros::Task(autondrive::reset_button_task);
   pros::Task(autondrive::motor_task);
   lift::set_callbacks();
   // robotfunctions::set_callbacks();

@@ -307,10 +307,17 @@ MenuAutonomous &selected_auton = default_auton;
 
 void create_folder_structure() {
   root_folder = new MenuFolder("", {
-      new MenuAutonomous("Win Point 2.0", autonroutines::blue_wp_2),
-      new MenuAutonomous("Right Two Yellow", autonroutines::right_side_two),
-      new MenuAutonomous("Right Yellow ML", autonroutines::right_yellow_ML),
-      new MenuAutonomous("Left Yellow Rings", autonroutines::shawnton_4_0),
+      new MenuFolder("Without Kickstand", {
+        new MenuAutonomous("Win Point 2.0", autonroutines::blue_wp_2),
+        new MenuAutonomous("Right Two Yellow", autonroutines::right_side_two),
+        new MenuAutonomous("Right Yellow ML", autonroutines::right_yellow_ML),
+        new MenuAutonomous("Left Yellow Rings", autonroutines::shawnton_4_0),
+      }),
+      new MenuFolder("With Kickstand", {
+        new MenuAutonomous("K Right Two Yellow", autonroutines::kickstand_right_side_two),
+        new MenuAutonomous("K Right Yellow ML", autonroutines::kickstand_right_yellow_ML),
+        new MenuAutonomous("K Left Yellow Rings", autonroutines::kickstand_shawnton_4_0),
+      }),
       new MenuFolder("Skills", {
         new MenuAutonomous("Skills 2.0", autonroutines::skills2),
         new MenuAutonomous("Skills 1.0", autonroutines::skills),
