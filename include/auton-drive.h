@@ -66,6 +66,7 @@ void set_callbacks();
 namespace autonroutines {
 
 extern controllerbuttons::Macro none;
+extern controllerbuttons::Macro right_sweep;
 extern controllerbuttons::Macro skills_3;
 extern controllerbuttons::Macro legacy_test;
 extern controllerbuttons::Macro okapi_test;

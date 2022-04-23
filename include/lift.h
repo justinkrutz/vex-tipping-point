@@ -21,6 +21,9 @@ class Piston {
   pros::ADIDigitalOut& piston;
 };
 
-extern Piston claw;
+extern Piston claw_r;
+extern Piston claw_l;
+extern Piston claw_b;
 extern Piston tilter;
+extern Piston shift;
 } // namespace lift

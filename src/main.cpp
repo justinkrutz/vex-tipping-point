@@ -43,7 +43,7 @@ void initialize() {
         Logger::LogLevel::warn // Show errors and warnings
     )
   );
-  // lift_gripper.set_value(1);
+  // left_claw.set_value(1);
   build_chassis();
   odom_init();
   // chassis->setState({13.491_in, 34.9911_in, 0_deg});
@@ -122,7 +122,7 @@ void opcontrol() {
 
   controllermenu::abort_auton();
   if (open_claw_on_start && !auton_has_run) {
-    // lift::claw.retract();
+    // lift::claw_l.retract();
   }
   if (pros::competition::is_connected()) {
     set_drive_callbacks();
@@ -145,9 +145,12 @@ void opcontrol() {
       auto gps_theta = gps_pos.yaw;
       auto gps_x = gps_pos.x;
       auto gps_y = gps_pos.y;
-      // controllermenu::master_print_array[0] = std::to_string(imu_state.x.convert(inch)) + " " + std::to_string(gps_x);
-      // controllermenu::master_print_array[1] = std::to_string(imu_state.y.convert(inch)) + " " + std::to_string(gps_y);
-      // controllermenu::master_print_array[2] = std::to_string(imu_state.theta.convert(degree)) + " " + std::to_string(gps_theta);
+      printf(("\nx " + std::to_string(imu_state.x.convert(inch))
+              + " y " + std::to_string(imu_state.y.convert(inch))
+              + " theta " + std::to_string(imu_state.theta.convert(degree))).c_str());
+      controllermenu::master_print_array[0] = std::to_string(imu_state.x.convert(inch));
+      controllermenu::master_print_array[1] = std::to_string(imu_state.y.convert(inch));
+      controllermenu::master_print_array[2] = std::to_string(imu_state.theta.convert(degree));
     }
     pros::delay(10);
   }

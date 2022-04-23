@@ -307,6 +307,7 @@ MenuAutonomous &selected_auton = default_auton;
 
 void create_folder_structure() {
   root_folder = new MenuFolder("", {
+      new MenuAutonomous("Left Sweep", autonroutines::right_sweep),
       new MenuAutonomous("Skills 3.0", autonroutines::skills_3),
       new MenuAutonomous("Legacy Test", autonroutines::legacy_test),
       new MenuAutonomous("Okapi Test", autonroutines::okapi_test),

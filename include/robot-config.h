@@ -12,8 +12,11 @@ extern pros::Controller partner;
 extern pros::Motor lift_motor;
 extern pros::Rotation lift_sensor;
 
-extern pros::ADIDigitalOut lift_gripper;
+extern pros::ADIDigitalOut shifter;
+extern pros::ADIDigitalOut back_claw;
 extern pros::ADIDigitalOut back_tilter;
+extern pros::ADIDigitalOut left_claw;
+extern pros::ADIDigitalOut right_claw;
 
 extern pros::Motor ring_motor;
 
