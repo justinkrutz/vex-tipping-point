@@ -148,9 +148,13 @@ void opcontrol() {
       printf(("\nx " + std::to_string(imu_state.x.convert(inch))
               + " y " + std::to_string(imu_state.y.convert(inch))
               + " theta " + std::to_string(imu_state.theta.convert(degree))).c_str());
-      controllermenu::master_print_array[0] = std::to_string(imu_state.x.convert(inch));
-      controllermenu::master_print_array[1] = std::to_string(imu_state.y.convert(inch));
-      controllermenu::master_print_array[2] = std::to_string(imu_state.theta.convert(degree));
+      auto state = chassis->getState();
+      controllermenu::master_print_array[0] = std::to_string(state.x.convert(inch));
+      controllermenu::master_print_array[1] = std::to_string(state.y.convert(inch));
+      controllermenu::master_print_array[2] = std::to_string(state.theta.convert(degree));
+      // controllermenu::master_print_array[0] = std::to_string(imu_state.x.convert(inch));
+      // controllermenu::master_print_array[1] = std::to_string(imu_state.y.convert(inch));
+      // controllermenu::master_print_array[2] = std::to_string(imu_state.theta.convert(degree));
     }
     pros::delay(10);
   }

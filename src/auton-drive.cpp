@@ -69,7 +69,7 @@ double forward = 0;
 double strafe  = 0;
 double turn    = 0;
 
-Target::Target(QLength x, QLength y, QAngle theta, bool hold, bool is_turn) : x(x), y(y), theta(theta), hold(hold), is_turn(is_turn) {}
+Target::Target(QLength x, QLength y, QAngle theta, bool hold, bool is_move, bool is_turn) : x(x), y(y), theta(theta), hold(hold), is_turn(is_turn) {}
 
 void Target::init_if_new() {
   if (is_new) {
@@ -77,6 +77,9 @@ void Target::init_if_new() {
     starting_state = get_odom_state();
     Point starting_point = {starting_state.x, starting_state.y};
     QLength total_distance = OdomMath::computeDistanceToPoint(starting_point, {x, y, theta});
+    auto angle_to_target = OdomMath::computeAngleToPoint({x, y}, starting_state);
+    // dir_multiplier = sgn(cos(angle_to_target.convert(radian)));
+    is_forward = cos(angle_to_target.convert(radian)) > 0;
 
     millis_at_start = pros::millis();
     int drive_timeout = total_distance.convert(inch) * 0.0334 * 100000/move_settings.mid_output + 700;
@@ -84,6 +87,10 @@ void Target::init_if_new() {
     int timeout = drive_timeout + turn_timeout;
   }
 }
+
+IterativePosPIDController distance_pid({1,0,0,0}, TimeUtilFactory().createDefault());
+IterativePosPIDController     turn_pid({0,0,0,0}, TimeUtilFactory().createDefault());
+IterativePosPIDController    drift_pid({0,0,0,0}, TimeUtilFactory().createDefault());
 
 void update_legacy() {
   if (targets_should_clear) {
@@ -107,29 +114,39 @@ void update_legacy() {
   Target &target = targets.front();
   target.init_if_new();
 
-  double move_speed;
+  double move_speed = 0;
   double strafe_speed = 0;
-  double turn_speed;
+  double turn_speed = 0;
 
   Point target_point{target.x, target.y};
 
   OdomState target_state{target.x, target.y, target.theta};
   Point starting_point{target.starting_state.x, target.starting_state.y};
+  OdomState current_state = get_odom_state();
 
-  auto [distance_to_target, direction] = OdomMath::computeDistanceAndAngleToPoint(target_point, get_odom_state());
-  QLength distance_traveled = OdomMath::computeDistanceToPoint(starting_point, get_odom_state());
+
+  auto angle_to_target = OdomMath::computeAngleToPoint(target_point, current_state);
+  auto distance_to_target = OdomMath::computeDistanceToPoint(target_point, {current_state.x, current_state.y, 0_deg});
+  QAngle angle_from_start_to_target = 0_deg;
+  // if (target.is_forward){
+    angle_from_start_to_target = OdomMath::computeAngleToPoint(starting_point, target_state);
+  // } else {
+    // angle_from_start_to_target = OdomMath::computeAngleToPoint(starting_point, {target.x, target.y, target.theta+180_deg});
+  // }
+  QLength distance_traveled = OdomMath::computeDistanceToPoint(starting_point, current_state);
   QLength total_distance = OdomMath::computeDistanceToPoint(starting_point, target_state);
+  // auto angle_from_start_to_target = OdomMath::computeAngleToPoint(starting_point, target_state);
 
   QAngle total_angle = target.theta - target.starting_state.theta;
 
 
   // controllermenu::master_print_array[1] = std::to_string(total_distance.convert(inch)) + " " + std::to_string(distance_traveled.convert(inch));
-  if (distance_traveled >= total_distance || abs(cos(direction.convert(radian))) < 0.1) {
+  if (!target.is_move || distance_traveled >= total_distance) {
     target_distance_reached = true;
   }
 
-  // controllermenu::master_print_array[2] = "turn_diff: " + std::to_string(abs((get_odom_state().theta - target_state.theta).convert(degree)));
-  if (abs(get_odom_state().theta - target_state.theta) < 10_deg) {
+  // controllermenu::master_print_array[2] = "turn_diff: " + std::to_string(abs((current_state.theta - target_state.theta).convert(degree)));
+  if (!target.is_turn || (current_state.theta - target_state.theta) < 2.5_deg) {
     target_heading_reached = true;
   }
 
@@ -143,49 +160,96 @@ void update_legacy() {
   if (target_heading_reached && target_distance_reached) {
     // if (!targets.empty() && !(targets.size() == 1 && target.hold)) {
     if (!targets.empty()) {
-      target_heading_reached = false;
-      target_distance_reached = false;
-      targets.pop();
-      return;
+      if ((targets.size() == 1 && target.hold)) {
+        final_target_reached = true;
+      } else {
+        target_heading_reached = false;
+        target_distance_reached = false;
+        targets.pop();
+        return;
+      }
     } else {
       final_target_reached = true;
     }
   } 
   
-  if (target_distance_reached && target.hold) {
+  // distance pid
+  if (!target_distance_reached || (target.is_move && target.hold)) {
+    // move_speed = rampMath(distance_traveled.convert(inch), total_distance.convert(inch), move_settings);
+    distance_pid.setTarget(total_distance.convert(inch));
+    // move_speed = distance_pid.step(distance_traveled.convert(inch));
+    // move_speed = distance_pid.step(distance_traveled.convert(inch));
+    move_speed = distance_pid.step(distance_traveled.convert(inch));
+    if (!target.is_forward) move_speed *= -1;
+    // controllermenu::master_print_array[2] = std::to_string(target.dir_multiplier) + " " + std::to_string(distance_traveled.convert(inch))
+    //       + " " + std::to_string(move_speed);
+  } else {
     move_speed = 0;
-    // move_speed = std::min(100.0, 2 * distance_to_target.convert(inch));
-  } else {
-    move_speed = rampMath(distance_traveled.convert(inch), total_distance.convert(inch), move_settings);
-    if (abs(distance_traveled - total_distance) > 5_in) {
-      strafe_speed  = 2 * sin(direction.convert(radian));
-    }
   }
 
-  if (target_heading_reached && target.hold) {
-    turn_speed = std::min(turn_max_speed, turn_p * (target.theta - get_odom_state().theta).convert(radian));
-    // turn_speed = std::min(turn_max_speed, turn_p * direction.convert(radian));
+  // turn pid
+  if (target.is_move && (!target.is_turn || !target_distance_reached)) {
+    turn_pid.setTarget(angle_from_start_to_target.convert(degree));
   } else {
-    turn_speed = std::min(turn_max_speed, turn_p * (target.theta - get_odom_state().theta).convert(radian));
-    // turn_speed = std::min(turn_max_speed, turn_p * direction.convert(radian));
+    turn_pid.setTarget(target.theta.convert(degree));
+  }
+  turn_speed = turn_pid.step(current_state.theta.convert(degree));
+
+  controllermenu::master_print_array[2] = std::to_string(turn_speed) + " " + std::to_string(angle_from_start_to_target.convert(degree))
+        + " " + std::to_string(current_state.theta.convert(degree));
+
+  // drift pid
+  if (abs(distance_traveled - total_distance) > 10_in) {
+    double small_angle  = ((angle_to_target - angle_from_start_to_target).convert(radian));
+    double perp_dist = sin(small_angle) * distance_to_target.convert(inch);
+    drift_pid.setTarget(0);
+    strafe_speed = drift_pid.step(perp_dist);
   }
 
-  forward = move_speed * cos(direction.convert(radian));
+
+
+
+    // if (abs(distance_traveled - total_distance) > 5_in) {
+    //   strafe_speed  = 2 * sin(angle_to_target.convert(radian));
+    // }
+
+  // if (target_heading_reached && target.hold) {
+  //   // turn_speed = std::min(turn_max_speed, turn_p * (target.theta - current_state.theta).convert(radian));
+  //   // turn_speed = std::min(turn_max_speed, turn_p * angle_to_target.convert(radian));
+  // } else {
+  //   // turn_speed = std::min(turn_max_speed, turn_p * (target.theta - current_state.theta).convert(radian));
+  //   // turn_speed = std::min(turn_max_speed, turn_p * angle_to_target.convert(radian));
+  // }
+
+  forward = move_speed;
+  // forward = move_speed * cos(angle_to_target.convert(radian));
   strafe  = strafe_speed;
   // strafe  = 0;
   turn    = turn_speed;
 }
 
-void add_target(QLength x, QLength y, QAngle theta, QLength offset_distance, QAngle offset_angle, bool hold = true) {
+void add_target(QLength x, QLength y, QAngle theta, QLength offset_distance, QAngle offset_angle, bool hold = true, bool is_move = true, bool is_turn = true) {
   drive_state == DriveState::kLegacy;
   QLength x_offset = cos(offset_angle) * offset_distance;
   QLength y_offset = sin(offset_angle) * offset_distance;
   final_target_reached = false;
-  target_queue.push({x - x_offset, y - y_offset, theta, hold});
+  target_queue.push({x - x_offset, y - y_offset, theta, hold, is_move, is_move});
 }
 
 void add_target(QLength x, QLength y, QAngle theta, QLength offset_distance, bool hold = true) {
-  add_target(x, y, theta, offset_distance, theta, hold);
+  add_target(x, y, theta, offset_distance, theta, hold, true, true);
+}
+
+void add_target(QLength x, QLength y, QLength offset_distance, bool hold = true) {
+  add_target(x, y, 0_deg, offset_distance, 0_deg, hold, true, false);
+}
+
+void add_target(QLength x, QLength y, bool hold = true) { // this one
+  add_target(x, y, 0_deg, 0_in, 0_deg, hold, true, false);
+}
+
+void add_target(QAngle theta, bool hold = true) {
+  add_target(0_in, 0_in, theta, 0_in, theta, hold, false, true);
 }
 
 void add_target(QLength x, QLength y, QAngle theta, bool hold = true) {
@@ -202,6 +266,10 @@ void add_target(Point point, QAngle theta, QLength offset_distance, bool hold = 
 
 void add_target(Point point, QAngle theta, bool hold = true) {
   add_target(point, theta, 0_in, hold);
+}
+
+void add_target(Point point, bool hold = true) {
+  add_target(point.x, point.y, hold);
 }
 
 void clear_all_targets() {
@@ -253,14 +321,14 @@ void motor_task()
     std::string y_str = std::to_string(int(get_odom_state().y.convert(inch)*100));
     std::string theta_str = std::to_string(get_odom_state().theta.convert(degree));
 
-    double forward = button_forward + drivetoposition::forward + stick_forward * 0.787401574803;
+    double forward = button_forward + drivetoposition::forward*100 + stick_forward * 0.787401574803;
     double temp_turn  = stick_turn * 0.787401574803;
-    double turn    = button_turn + drivetoposition::turn + temp_turn + strafe;
+    double turn_    = button_turn + drivetoposition::turn*100 + temp_turn + strafe*100;
 
     if (drive_state == DriveState::kLegacy) {
       update_legacy();
-      double left_drive  = (forward + turn)/100.0;
-      double right_drive = (forward - turn)/100.0;
+      double left_drive  = (forward + turn_)/100.0;
+      double right_drive = (forward - turn_)/100.0;
       // double left_drive  = 1.27 * (forward + turn);
       // double right_drive = 1.27 * (forward - turn);
       chassis->getModel()->left(left_drive);
@@ -411,6 +479,7 @@ void auton_init(OdomState odom_state, std::string name = "unnamed", bool is_skil
 
 void auton_clean_up() {
   clear_all_targets();
+  chassis->stop();
   drive_state = DriveState::kDisabled;
   // auton_drive_enabled = false;
   button_turn = 0;
@@ -449,41 +518,20 @@ Macro none([](){},[](){});
 
 Macro legacy_test(
     [](){
-      auton_init({26_in, goal_1.y, 0_deg});
+      auton_init({0_in, 0_in, 45_deg});
       using namespace odomutilities;
 
-      move_settings.start_output = 20;
-      move_settings.mid_output = 100;
-      move_settings.end_output = 20;
+      distance_pid.setGains({0.2,0,0,0});
+          turn_pid.setGains({0.01,0,0,0});
+         drift_pid.setGains({0,0,0,0});
 
-      turn_settings.mid_output = 30;
-
-      // turn_settings.mid_output = 30;
-      lift::claw_l.retract();
-      lift_motor.move_absolute(-10, 100);
-      add_target(goal_1, 0_deg, front_goal_offset);
+      lift::shift.retract();
+      // add_target(0_in, 20_in, true);
+      add_target(20_in, 0_in, true);
       wait_until_final_target_reached();
-      lift::claw_l.extend();
-      // lift_motor.move_absolute(90, 100);
-      lift_motor.move_absolute(360, 100);
       wait(1000);
-      //pick up blue goal 1
-
-      add_target(goal_3.x, goal_1.y, 0_deg);
-      add_target(goal_3.x, goal_1.y, 90_deg);
+      add_target(0_in, 0_in);
       wait_until_final_target_reached();
-      lift::tilter.retract();
-      add_target(goal_3.x, goal_7.y, 90_deg, back_goal_offset);
-      // wait_until_final_target_reached(3500);
-
-      // add_target(10_in, 0_in, 0_deg);
-      // add_target(10_in, 0_in, 90_deg);
-      // add_target(10_in, 10_in, 90_deg);
-      // add_target(10_in, 10_in, 45_deg);
-      // add_target(0_in, 0_in, 45_deg);
-      // add_target(0_in, 0_in, 0_deg);
-      wait_until_final_target_reached();
-      wait(3000);
     },
     [](){
       auton_clean_up();
@@ -495,12 +543,15 @@ Macro legacy_test(
       using namespace odomutilities;
 
 
+
       move_settings.start_output = 20;
       move_settings.mid_output = 100;
       move_settings.end_output = 20;
       move_settings.ramp_up_p = 0.2;
       move_settings.ramp_down_p = 0.2;
       turn_p = 50;
+
+      drive_state = DriveState::kOkapi;
 
 
 
@@ -509,14 +560,17 @@ Macro legacy_test(
       lift::shift.extend();
       
       lift_motor.move_absolute(-10, 100);
-      add_target(37_in, 0_in, 0_deg);
+      // add_target(37_in, 0_in, 0_deg);
+      chassis->moveDistance(43_in);
       wait_until_final_target_reached();
       lift::claw_r.extend();
-      add_target(43_in, 0_in, 0_deg);
+      chassis->moveDistance(10_in);
+      // add_target(49_in, 0_in, 0_deg);
       wait_until_final_target_reached();
       lift::claw_l.extend();
       lift::shift.retract();
-      add_target(0_in, 0_in, 0_deg);
+      // add_target(0_in, 0_in, 0_deg);
+      chassis->moveDistance(-53_in);
       lift_motor.move_absolute(0, 100);
       wait_until_final_target_reached();
     },
@@ -530,12 +584,15 @@ Macro legacy_test(
     [](){
       auton_init({0_in, 0_in, 0_deg});
       drive_state = DriveState::kOkapi;
-      chassis->driveToPoint({20_in, 20_in});
-      chassis->turnToAngle(0_deg);
       chassis->moveDistance(20_in);
-      chassis->turnToPoint({20_in, 20_in});
-      chassis->driveToPoint({0_in, 0_in});
-      chassis->turnToAngle(0_deg);
+      chassis->moveDistance(6_in);
+      chassis->moveDistance(-26_in);
+      // chassis->driveToPoint({20_in, 20_in});
+      // chassis->turnToAngle(0_deg);
+      // chassis->moveDistance(20_in);
+      // chassis->turnToPoint({20_in, 20_in});
+      // chassis->driveToPoint({0_in, 0_in});
+      // chassis->turnToAngle(0_deg);
       wait(1000);
 
     },

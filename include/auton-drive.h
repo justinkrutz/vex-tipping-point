@@ -31,7 +31,7 @@ namespace drivetoposition {
 
 class Target {
  public:
-  Target(QLength x, QLength y, QAngle theta, bool hold = true, bool is_turn = true);
+  Target(QLength x, QLength y, QAngle theta, bool hold = true, bool is_move = true, bool is_turn = true);
 
   QLength x = 0_in;
   QLength y = 0_in;
@@ -39,8 +39,11 @@ class Target {
   OdomState starting_state;
   bool hold;
 
-  bool is_legacy;
+  // bool is_legacy;
+  bool is_move;
   bool is_turn;
+  bool is_forward;
+  // int dir_multiplier;
 
   int millis_at_start;
   int timeout;
