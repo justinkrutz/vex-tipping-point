@@ -308,33 +308,7 @@ MenuAutonomous &selected_auton = default_auton;
 void create_folder_structure() {
   root_folder = new MenuFolder("", {
       new MenuFolder("Without Kickstand", {
-        new MenuAutonomous("Win Point 2.0", autonroutines::blue_wp_2),
-        new MenuAutonomous("Right Two Yellow", autonroutines::right_side_two),
-        new MenuAutonomous("Right Yellow ML", autonroutines::right_yellow_ML),
-        new MenuAutonomous("Left Yellow Rings", autonroutines::shawnton_4_0),
-      }),
-      new MenuFolder("With Kickstand", {
-        new MenuAutonomous("K Right Two Yellow", autonroutines::kickstand_right_side_two),
-        new MenuAutonomous("K Right Yellow ML", autonroutines::kickstand_right_yellow_ML),
-        new MenuAutonomous("K Left Yellow Rings", autonroutines::kickstand_shawnton_4_0),
-      }),
-      new MenuFolder("Skills", {
-        new MenuAutonomous("Skills 2.0", autonroutines::skills2),
-        new MenuAutonomous("Skills 1.0", autonroutines::skills),
-        new MenuAutonomous("Keyan Skills", autonroutines::keyan_skills),
-      }),
-      new MenuFolder("Unused", {
-        new MenuAutonomous("Right Yellow Rings", autonroutines::right_yellow_rings),
-        new MenuAutonomous("None", autonroutines::none),
-        new MenuAutonomous("Win Point 1.0", autonroutines::blue_wp),
-        new MenuAutonomous("Left Only Rings", autonroutines::left_side_rings),
-        new MenuAutonomous("One Side", autonroutines::one_side),
-        new MenuAutonomous("Test", autonroutines::test),
-        new MenuAutonomous("Point and Shoot", autonroutines::point_and_shoot),
-        new MenuAutonomous("Point and Plus Old", autonroutines::point_and_plus_old),
-        new MenuAutonomous("Point and Plus Fast", autonroutines::point_and_plus_fast),
-        new MenuAutonomous("point_and_plus_4", autonroutines::point_and_plus_4),
-        new MenuAutonomous("Point and Plus Sensor", autonroutines::point_and_plus),
+        new MenuAutonomous("right_side_double", autonroutines::right_side_double),
       })
     // new MenuAutonomous("Home Row Three", autonroutines::home_row_three),
     // new MenuAutonomous("ShawnTon 3.0", autonroutines::shawnton_three),

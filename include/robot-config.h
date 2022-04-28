@@ -19,8 +19,11 @@ extern pros::Motor right_back;
 extern pros::Motor lift_motor;
 extern pros::Rotation lift_sensor;
 
-extern pros::ADIDigitalOut lift_gripper;
+extern pros::ADIDigitalOut shifter;
+extern pros::ADIDigitalOut back_claw;
 extern pros::ADIDigitalOut back_tilter;
+extern pros::ADIDigitalOut left_claw;
+extern pros::ADIDigitalOut right_claw;
 
 extern pros::Motor ring_motor;
 
@@ -44,6 +47,8 @@ extern pros::ADIDigitalIn reset_button;
 // extern pros::Rotation tracker_left;
 // extern pros::Rotation tracker_back;
 // extern pros::Rotation tracker_right;
+extern pros::Rotation left_drive_sensor;
+extern pros::Rotation right_drive_sensor;
 
 // extern pros::Distance distance_sensor_right;
 // extern pros::Distance distance_sensor_left;

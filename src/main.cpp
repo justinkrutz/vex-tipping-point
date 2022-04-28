@@ -36,6 +36,10 @@ void set_drive_callbacks() {
  */
 
 void initialize() {
+  left_drive_sensor.reset();
+  left_drive_sensor.reset_position();
+  right_drive_sensor.reset();
+  right_drive_sensor.reset_position();
   // lift_gripper.set_value(1);
   // build_chassis();
   // odom_init();
@@ -115,7 +119,7 @@ void autonomous() {
 void opcontrol() {
   controllermenu::abort_auton();
   if (open_claw_on_start && !auton_has_run) {
-    // lift::claw.retract();
+    // lift::claw_r.retract();
   }
   if (pros::competition::is_connected()) {
     set_drive_callbacks();
