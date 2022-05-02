@@ -80,6 +80,7 @@ class MotorToggle {
 
 Piston claw(lift_gripper);
 Piston tilter(back_tilter);
+Piston tilter_release(tilter_drop);
 
 MotorToggle intake(ring_motor);
 

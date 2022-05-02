@@ -19,6 +19,7 @@ pros::Rotation lift_sensor(3);
 
 pros::ADIDigitalOut lift_gripper('a', true);
 pros::ADIDigitalOut back_tilter('b', true);
+pros::ADIDigitalOut tilter_drop('d', true);
 
 pros::Motor ring_motor(11, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_DEGREES);
 
