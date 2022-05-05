@@ -479,7 +479,6 @@ auto defaut_kickstand_distance = 39.5_in;
 auto defaut_no_kickstand_distance = 43_in;
 
 void goal_rush(QLength first_distance, QAngle first_angle, QLength second_distance, QAngle second_angle, bool lift_high = true) {
-  // TODO: Add lift reset
   move_settings.ramp_up_p = 0.3;
   move_settings.ramp_down_p = 0.3;
   move_settings.start_output = 100;
@@ -492,6 +491,9 @@ void goal_rush(QLength first_distance, QAngle first_angle, QLength second_distan
 
   lift::claw.retract();
   add_target(first_distance, first_angle);
+  lift_motor.move(-64);
+  wait(150);
+  lift_motor.tare_position();
   lift_motor.move_absolute(30, 100);
   wait_until_final_target_reached();
   lift::claw.extend();
@@ -799,8 +801,9 @@ void option_center_right_fast(bool kickstand) {
   move_settings.mid_output = 100;
   move_settings.end_output = 20;
   lift::tilter.extend();
-  wait(1300);
-  add_target(45_in, -25_deg);
+  wait(500);
+  add_target(45_in, -125_deg);
+  add_target(-90_deg);
   wait_until_final_target_reached();
 }
 
