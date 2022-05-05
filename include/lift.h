@@ -7,7 +7,7 @@ void set_callbacks();
 
 class Piston {
  public:
-  Piston(pros::ADIDigitalOut& piston, bool is_double = false);
+  Piston(pros::ADIDigitalOut& piston, bool invert = false, bool is_double = false);
   
   static int piston_cycles;
 
@@ -16,6 +16,7 @@ class Piston {
   void toggle();
   void print();
 
+  bool invert = false;
   bool piston_out = false;
   bool is_double;
   pros::ADIDigitalOut& piston;

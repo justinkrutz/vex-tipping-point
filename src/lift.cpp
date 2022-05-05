@@ -17,17 +17,17 @@ void init() {
   lift_sensor.set_reversed(true);
 }
 
-Piston::Piston(pros::ADIDigitalOut& piston, bool is_double) : piston(piston), is_double(is_double) {}
+Piston::Piston(pros::ADIDigitalOut& piston, bool invert, bool is_double) : piston(piston), invert(invert), is_double(is_double) {}
   
 void Piston::extend() {
-  piston.set_value(true);
+  piston.set_value(!invert);
   piston_cycles++;
   piston_out = true;
   print();
 }
 
 void Piston::retract() {
-  piston.set_value(false);
+  piston.set_value(invert);
   piston_out = false;
   if (is_double) {
     piston_cycles++;
@@ -42,7 +42,7 @@ void Piston::toggle() {
     piston_cycles++;
   }
   piston_out = !piston_out;
-  piston.set_value(piston_out);
+  piston.set_value(piston_out^invert);
   print();
 }
 
@@ -78,8 +78,8 @@ class MotorToggle {
 };
 
 
-Piston claw(lift_gripper);
-Piston tilter(back_tilter);
+Piston claw(lift_gripper, true);
+Piston tilter(back_tilter, true, true);
 Piston tilter_release(tilter_drop);
 
 MotorToggle intake(ring_motor);
