@@ -17,6 +17,7 @@ while (!(condition) && pros::millis() - wait_until_timeout_start < timeout) { \
 namespace autondrive {
 extern controllerbuttons::MacroGroup auton_group;
 extern controllerbuttons::MacroGroup drive_group;
+extern bool stick_control_enabled;
 
 namespace drivetoposition {
 
@@ -53,28 +54,31 @@ void set_callbacks();
 
 namespace autonroutines {
 
-extern controllerbuttons::Macro shawnton_4_0;
-extern controllerbuttons::Macro right_yellow_ML;
-extern controllerbuttons::Macro right_yellow_rings;
-extern controllerbuttons::Macro left_side_rings;
-extern controllerbuttons::Macro blue_wp_2;
-extern controllerbuttons::Macro right_side_two;
+extern controllerbuttons::Macro win_point_2;
+extern controllerbuttons::Macro left_yellow_ml;
+extern controllerbuttons::Macro right_yellow_ml;
+extern controllerbuttons::Macro right_center_pull;
+extern controllerbuttons::Macro right_center_fast;
+extern controllerbuttons::Macro center_right_fast;
 
-extern controllerbuttons::Macro kickstand_shawnton_4_0;
-extern controllerbuttons::Macro kickstand_right_yellow_ML;
+extern controllerbuttons::Macro kickstand_left_yellow_ml;
+extern controllerbuttons::Macro kickstand_right_yellow_ml;
 extern controllerbuttons::Macro kickstand_right_yellow_rings;
-extern controllerbuttons::Macro kickstand_right_side_two;
+extern controllerbuttons::Macro kickstand_right_center_pull;
 
+extern controllerbuttons::Macro skills_2;
+
+extern controllerbuttons::Macro left_side_rings;
+extern controllerbuttons::Macro right_yellow_rings;
 extern controllerbuttons::Macro none;
 extern controllerbuttons::Macro test;
-extern controllerbuttons::Macro blue_wp;
+extern controllerbuttons::Macro win_point_1;
 extern controllerbuttons::Macro one_side;
 extern controllerbuttons::Macro point_and_shoot;
 extern controllerbuttons::Macro point_and_plus;
 extern controllerbuttons::Macro point_and_plus_old;
 extern controllerbuttons::Macro point_and_plus_fast;
-extern controllerbuttons::Macro skills;
-extern controllerbuttons::Macro skills2;
+extern controllerbuttons::Macro skills_1;
 extern controllerbuttons::Macro point_and_plus_4;
 extern controllerbuttons::Macro keyan_skills;
 

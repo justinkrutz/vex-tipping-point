@@ -26,37 +26,12 @@ pros::Motor ring_motor(11, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER
 pros::Gps gps(12, 0.07, 0.07);
 pros::IMU imu(13);
 pros::Distance back_distance(14);
-pros::ADIDigitalIn goal_sensor('g');
 
-pros::ADIDigitalIn reset_button('C');
+pros::ADIDigitalIn goal_sensor_left('e');
+pros::ADIDigitalIn goal_sensor_right('f');
+pros::ADIDigitalIn goal_sensor_center('g');
 
-// okapi::Motor drive_fl (9, false, AbstractMotor::gearset::green, AbstractMotor::encoderUnits::degrees);
-// okapi::Motor drive_fr (10, true,  AbstractMotor::gearset::green, AbstractMotor::encoderUnits::degrees);
-// okapi::Motor drive_bl (1, false, AbstractMotor::gearset::green, AbstractMotor::encoderUnits::degrees);
-// okapi::Motor drive_br (2, true,  AbstractMotor::gearset::green, AbstractMotor::encoderUnits::degrees);
-
-// pros::Motor intake_left (3, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
-// pros::Motor intake_right (8, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
-// pros::Motor top_roller (12, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
-// pros::Motor bottom_roller (20, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_DEGREES);
-
-// pros::Imu imu (4);
-// pros::Rotation tracker_left (5);
-// pros::Rotation tracker_back (6);
-// pros::Rotation tracker_right (7);
-
-// pros::Distance distance_sensor_right(15);
-// pros::Distance distance_sensor_left(16);
-// pros::Optical optical_sensor(17);
-
-// pros::ADILineSensor ball_sensor_intake ('A');
-// pros::ADILineSensor ball_sensor_bottom ('B');
-// pros::ADILineSensor ball_sensor_middle ('C');
-// pros::ADILineSensor ball_sensor_top    ('D');
-// pros::ADILineSensor ball_sensor_score  ('E');
-// //                                     ('F');
-// pros::ADILineSensor goal_sensor_one    ('G');
-// pros::ADILineSensor goal_sensor_two    ('H');
+pros::ADIDigitalIn reset_button('c');
 
 void build_chassis() {
   // tracker_left.reset_position();

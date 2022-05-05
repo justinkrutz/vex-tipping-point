@@ -24,4 +24,9 @@ class Piston {
 
 extern Piston claw;
 extern Piston tilter;
+
+extern bool auto_grip_ready;
+extern bool auto_grip_enabled;
+extern bool goal_detect_center_only;
+
 } // namespace lift

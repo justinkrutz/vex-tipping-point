@@ -22,6 +22,7 @@ void set_drive_callbacks() {
   // robotfunctions::set_callbacks();
   lift::set_callbacks();
   // autondrive::set_callbacks();
+  autondrive::stick_control_enabled = true;
   autondrive::auton_group.terminate();
   controllermenu::master_print_array[0] = "";
   controllermenu::master_print_array[1] = "";
@@ -36,6 +37,7 @@ void set_drive_callbacks() {
  */
 
 void initialize() {
+  autondrive::stick_control_enabled = false;
   // lift_gripper.set_value(1);
   // build_chassis();
   // odom_init();

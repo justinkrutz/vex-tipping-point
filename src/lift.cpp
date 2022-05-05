@@ -113,9 +113,29 @@ void goal_button_released() {
   auto_grip_ready = false; 
 }
 
+bool goal_detect_center_only = false;
+bool goal_released = true;
+
+bool goal_detected() {
+  bool left = goal_sensor_left.get_value();
+  bool right = goal_sensor_right.get_value();
+  bool center = goal_sensor_center.get_value();
+  if (!goal_released) {
+    if (!(center || left || right)) {
+      goal_released = true;
+    }
+    return false;
+  }
+  if (center || (!goal_detect_center_only && (left || right))) {
+    goal_released = false;
+    return true;
+  }
+  return false;
+}
+
 void task_function() {
   while (true) {
-    if (auto_grip_enabled && auto_grip_ready && goal_sensor.get_new_press() && !claw.piston_out) {
+    if (auto_grip_enabled && auto_grip_ready && goal_detected() && !claw.piston_out) {
       goal_button_pressed.terminate();
       claw.extend();
       goal_auto_gripped = true;
