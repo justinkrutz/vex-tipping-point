@@ -55,18 +55,24 @@ void set_callbacks();
 namespace autonroutines {
 
 extern controllerbuttons::Macro win_point_2;
+extern controllerbuttons::Macro win_point_3;
 extern controllerbuttons::Macro left_yellow_ml;
 extern controllerbuttons::Macro right_yellow_ml;
 extern controllerbuttons::Macro right_center_pull;
 extern controllerbuttons::Macro right_center_fast;
 extern controllerbuttons::Macro center_right_fast;
+extern controllerbuttons::Macro left_center;
 
 extern controllerbuttons::Macro kickstand_left_yellow_ml;
 extern controllerbuttons::Macro kickstand_right_yellow_ml;
 extern controllerbuttons::Macro kickstand_right_yellow_rings;
 extern controllerbuttons::Macro kickstand_right_center_pull;
+extern controllerbuttons::Macro kickstand_right_center_fast;
+extern controllerbuttons::Macro kickstand_center_right_fast;
+extern controllerbuttons::Macro kickstand_left_center;
 
 extern controllerbuttons::Macro skills_2;
+extern controllerbuttons::Macro extra_far;
 
 extern controllerbuttons::Macro left_side_rings;
 extern controllerbuttons::Macro right_yellow_rings;

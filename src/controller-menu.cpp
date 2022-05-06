@@ -309,21 +309,29 @@ void create_folder_structure() {
   root_folder = new MenuFolder("", {
       new MenuFolder("Without Kickstand", {
         new MenuAutonomous("Win Point 2.0", autonroutines::win_point_2),
+        new MenuAutonomous("Win Point 3.0", autonroutines::win_point_3),
         new MenuAutonomous("Right Center Pull", autonroutines::right_center_pull),
         new MenuAutonomous("Right Center Fast", autonroutines::right_center_fast),
         new MenuAutonomous("Center Right Fast", autonroutines::center_right_fast),
         new MenuAutonomous("Right Yellow ML", autonroutines::right_yellow_ml),
         new MenuAutonomous("Left Yellow ML", autonroutines::left_yellow_ml),
+        new MenuAutonomous("Left Center", autonroutines::left_center),
       }),
       new MenuFolder("With Kickstand", {
-        new MenuAutonomous("K Right Two Yellow", autonroutines::kickstand_right_center_pull),
-        new MenuAutonomous("K Right Yellow ML", autonroutines::kickstand_right_yellow_ml),
         new MenuAutonomous("K Left Yellow ML", autonroutines::kickstand_left_yellow_ml),
+        new MenuAutonomous("K Right Yellow ML", autonroutines::kickstand_right_yellow_ml),
+        new MenuAutonomous("K Right Center Pull", autonroutines::kickstand_right_center_pull),
+        new MenuAutonomous("K Right Center Fast", autonroutines::kickstand_right_center_fast),
+        new MenuAutonomous("K Center Right Fast", autonroutines::kickstand_center_right_fast),
+        new MenuAutonomous("K Left Center", autonroutines::kickstand_left_center),
       }),
       new MenuFolder("Skills", {
         new MenuAutonomous("Skills 2.0", autonroutines::skills_2),
         new MenuAutonomous("Skills 1.0", autonroutines::skills_1),
         new MenuAutonomous("Keyan Skills", autonroutines::keyan_skills),
+      }),
+      new MenuFolder("Experamental", {
+        new MenuAutonomous("Extra Far", autonroutines::extra_far),
       }),
       new MenuFolder("Unused", {
         new MenuAutonomous("None", autonroutines::none),
