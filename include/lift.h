@@ -24,6 +24,8 @@ class Piston {
 
 extern Piston claw;
 extern Piston tilter;
+extern Piston tilter_release;
+extern Piston shooter;
 
 extern bool auto_grip_ready;
 extern bool auto_grip_enabled;

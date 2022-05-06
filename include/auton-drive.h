@@ -60,6 +60,7 @@ extern controllerbuttons::Macro left_yellow_ml;
 extern controllerbuttons::Macro right_yellow_ml;
 extern controllerbuttons::Macro right_center_pull;
 extern controllerbuttons::Macro right_center_fast;
+extern controllerbuttons::Macro right_center_shoot;
 extern controllerbuttons::Macro center_right_fast;
 extern controllerbuttons::Macro left_center;
 
@@ -68,6 +69,7 @@ extern controllerbuttons::Macro kickstand_right_yellow_ml;
 extern controllerbuttons::Macro kickstand_right_yellow_rings;
 extern controllerbuttons::Macro kickstand_right_center_pull;
 extern controllerbuttons::Macro kickstand_right_center_fast;
+extern controllerbuttons::Macro kickstand_right_center_shoot;
 extern controllerbuttons::Macro kickstand_center_right_fast;
 extern controllerbuttons::Macro kickstand_left_center;
 
