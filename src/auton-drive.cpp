@@ -487,7 +487,7 @@ auto kickstand_offset_angle = 0_deg;
 auto defaut_kickstand_distance = 39.5_in;
 auto defaut_no_kickstand_distance = 43_in;
 
-void goal_rush(QLength first_distance, QAngle first_angle, QLength second_distance, QAngle second_angle, bool tall_goal = false, int end_speed = 100, bool shoot_right = false) {
+void goal_rush(QLength first_distance, QAngle first_angle, QLength second_distance, QAngle second_angle, bool tall_goal = false, int end_speed = 100) {
   move_settings.ramp_up_p = 0.3;
   move_settings.ramp_down_p = 0.3;
   move_settings.start_output = 100;
@@ -499,17 +499,7 @@ void goal_rush(QLength first_distance, QAngle first_angle, QLength second_distan
   lift::goal_detect_center_only = false;
 
   lift::claw.retract();
-  if (shoot_right) {
-    auto shoot_distance = 12_in;
-    add_target(shoot_distance, first_angle);
-    wait_until_final_target_reached();
-    lift::shooter.extend();
-    add_target(first_distance-shoot_distance, first_angle);
-    wait (200);
-    lift::shooter.retract();
-  } else {
-    add_target(first_distance, first_angle);
-  }
+  add_target(first_distance, first_angle);
   lift_motor.move(-127);
   wait(250);
   lift_motor.tare_position();
@@ -858,9 +848,9 @@ void option_right_center_shoot(bool kickstand) {
   auton_init({57_in, 32_in, 0_deg});
 
   if (kickstand) {
-    goal_rush(defaut_kickstand_distance, 0_deg, -6_in, 0_deg, false, 100, true);
+    goal_rush(defaut_kickstand_distance, 0_deg, -6_in, 0_deg, false);
   } else {
-    goal_rush(defaut_no_kickstand_distance, 0_deg, -6_in, 0_deg, false, 100, true);
+    goal_rush(defaut_no_kickstand_distance, 0_deg, -6_in, 0_deg, false);
   }
 
   move_settings.start_output = 20;
