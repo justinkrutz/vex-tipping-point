@@ -511,21 +511,22 @@ void goal_rush(QLength first_distance, QAngle first_angle, QLength second_distan
   lift_motor.move(-127);
   wait(250);
   lift_motor.tare_position();
-    lift_motor.move(0);
+  lift_motor.move(0);
   if (tall_goal) {
-    lift_motor.move_absolute(10, 100);
+    lift_motor.move_absolute(20, 100);
   } else {
     lift_motor.move_absolute(30, 100);
   }
-    wait_until_final_target_reached();
-    lift::claw.extend();
-    lift::auto_grip_ready = false;
-    if (tall_goal) wait(200);
-    move_settings.end_output = 20;
-    add_target(second_distance, second_angle);
+
+  wait_until_final_target_reached();
+  lift::claw.extend();
+  lift::auto_grip_ready = false;
+  if (tall_goal) wait(200);
+  move_settings.end_output = 20;
+  add_target(second_distance, second_angle);
 
   if (tall_goal) {
-    lift_motor.move_absolute(60, 100);
+    lift_motor.move_absolute(100, 100);
   } else {
     lift_motor.move_absolute(360, 100);
   }
@@ -905,9 +906,9 @@ void option_center_right_fast(bool kickstand) {
   auton_init({0_in, 0_in, starting_angle});
 
   if (kickstand) {
-    goal_rush(53_in, starting_angle, 0_in, starting_angle, true, 10);
+    goal_rush(47_in, starting_angle, -6_in, starting_angle, true, 100);
   } else {
-    goal_rush(6_in+defaut_no_kickstand_distance, starting_angle, 0_in, starting_angle, true, 10);
+    goal_rush(6_in+defaut_no_kickstand_distance, starting_angle, -6_in, starting_angle, true, 100);
   }
 
   move_settings.start_output = 20;
@@ -915,6 +916,8 @@ void option_center_right_fast(bool kickstand) {
   move_settings.end_output = 20;
   turn_p = 0.4;
   turn_max_speed = 40;
+  move_settings.ramp_up_p = 0.2;
+  move_settings.ramp_down_p = 0.2;
 
   wait(100);
   add_target(-90_deg);
@@ -925,15 +928,15 @@ void option_center_right_fast(bool kickstand) {
   add_target(-120_deg);
   wait_until_final_target_reached();
 
-  move_settings.mid_output = 20;
-  move_settings.end_output = 15;
-  add_target(-14_in, -120_deg);
+  move_settings.mid_output = 40;
+  move_settings.end_output = 20;
+  add_target(-10_in, -120_deg);
   wait_until_final_target_reached(3000);
   move_settings.mid_output = 100;
   move_settings.end_output = 20;
   lift::tilter.extend();
   wait(500);
-  add_target(45_in, -125_deg);
+  add_target(45_in, -135_deg);
   add_target(-90_deg);
   wait_until_final_target_reached();
 }
