@@ -62,6 +62,7 @@ bool targets_should_clear = true;
 bool final_target_reached = true;
 bool target_heading_reached = false;
 bool target_distance_reached = false;
+QLength proximity_to_target = 0_in;
 
 OdomState starting_position;
 // RampMathSettings move_settings = {20, 100, 20, 0.5, 0.5};
@@ -112,6 +113,7 @@ void update() {
   Point starting_point{target.starting_state.x, target.starting_state.y};
 
   auto [distance_to_target, direction] = OdomMath::computeDistanceAndAngleToPoint(target_point, get_odom_state());
+  proximity_to_target = distance_to_target;
   QLength distance_traveled = OdomMath::computeDistanceToPoint(starting_point, get_odom_state());
   QLength total_distance = OdomMath::computeDistanceToPoint(starting_point, target_state);
 
@@ -231,6 +233,12 @@ void wait_until_clamp_or_target() {
     wait(10);
   }
   clear_all_targets();
+}
+
+void wait_until_proximity(QLength proximity) {
+  while (!final_target_reached && proximity_to_target < proximity) {
+    wait(10);
+  }
 }
 
 void wait_until_goal(int timeout) {
@@ -503,18 +511,18 @@ void goal_rush(QLength first_distance, QAngle first_angle, QLength second_distan
   lift_motor.move(-127);
   wait(250);
   lift_motor.tare_position();
-  lift_motor.move(0);
+    lift_motor.move(0);
   if (tall_goal) {
     lift_motor.move_absolute(10, 100);
   } else {
     lift_motor.move_absolute(30, 100);
   }
-  wait_until_final_target_reached();
-  lift::claw.extend();
-  lift::auto_grip_ready = false;
-  if (tall_goal) wait(200);
-  move_settings.end_output = 20;
-  add_target(second_distance, second_angle);
+    wait_until_final_target_reached();
+    lift::claw.extend();
+    lift::auto_grip_ready = false;
+    if (tall_goal) wait(200);
+    move_settings.end_output = 20;
+    add_target(second_distance, second_angle);
 
   if (tall_goal) {
     lift_motor.move_absolute(60, 100);
