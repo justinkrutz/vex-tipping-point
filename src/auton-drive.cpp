@@ -936,8 +936,10 @@ void option_center_right_fast(bool kickstand) {
   move_settings.end_output = 20;
   lift::tilter.extend();
   wait(500);
-  add_target(45_in, -135_deg);
-  add_target(-90_deg);
+  turn_p = 0.4;
+  turn_max_speed = 40;
+  add_target(55_in, -220_deg);
+  // add_target(-90_deg);
   wait_until_final_target_reached();
 }
 
@@ -987,88 +989,6 @@ Macro extra_far(
     auton_clean_up,
     {&auton_group});
 
-Macro win_point_3(
-    [](){
-      auton_init({0_in, 0_in, 0_deg});
-      lift::auto_grip_enabled = false;
-
-
-      move_settings.start_output = 20;
-      move_settings.mid_output = 100;
-      move_settings.end_output = 20;
-
-      // add_target(315_deg);
-      lift_motor.move_absolute(230, 100);
-      wait(400);
-      add_target(4_in, 0_deg);
-      wait_until_final_target_reached();
-      wait(100);
-      lift::claw.retract();
-      wait(100);
-      add_target(-6_in, 0_deg);
-      wait(200);
-      lift_motor.move_absolute(0, 100);
-      wait(300);
-      add_target(6_in, 0_deg);
-      wait_until_final_target_reached();
-      // wait(200);
-      lift::claw.extend();
-      lift_motor.move_absolute(360, 100);
-      wait_until_final_target_reached();
-      wait(200);
-      add_target(-90_deg);
-      add_target(24_in, -90_deg);
-      add_target(-180_deg);
-      wait_until_final_target_reached();
-      move_settings.end_output = 100;
-      add_target(-100_in, -180_deg);
-      wait_until_final_target_reached();
-      lift::tilter.retract();
-      move_settings.start_output = 100;
-      move_settings.end_output = 40;
-      move_settings.mid_output = 40;
-      add_target(-15_in, -180_deg);
-      wait_until_final_target_reached(1000);
-
-      lift::tilter.extend();
-      wait(500);
-      ring_motor.move_velocity(400);
-      move_settings.start_output = 20;
-      move_settings.mid_output = 20;
-      move_settings.end_output = 20;
-      move_settings.ramp_down_p = 0.4;
-      move_settings.ramp_up_p = 0.4;
-      add_target(-270_deg);
-      wait_until_final_target_reached();
-      add_target(24_in, -270_deg);
-      ring_motor.move_velocity(600);
-      wait_until_final_target_reached();
-      
-      move_settings.mid_output = 100;
-      wait(11);
-      add_target(-24_in, -270_deg);
-      wait(700);
-      ring_motor.move_velocity(-600);
-      wait_until_final_target_reached(3000);
-
-      move_settings.mid_output = 20;
-      wait(11);
-      ring_motor.move_velocity(600);
-      add_target(24_in, -270_deg);
-      wait_until_final_target_reached(3000);
-
-      add_target(-6_in, -270_deg);
-      wait_until_final_target_reached();
-      add_target(-90_deg);
-      turn_p = 0.3;
-      wait_until_final_target_reached();
-      lift::tilter.retract();
-
-      wait_until_final_target_reached();
-    },
-    auton_clean_up,
-    {&auton_group});
-
 Macro win_point_2(
     [](){
       auton_init({0_in, 0_in, 0_deg});
@@ -1092,6 +1012,72 @@ Macro win_point_2(
       lift_motor.move_absolute(20, 100);
       wait(300);
       add_target(6_in, 0_deg);
+      wait_until_final_target_reached();
+      // wait(200);
+      lift::claw.extend();
+      add_target(7_in, 0_deg);
+      lift_motor.move_absolute(360, 100);
+      wait_until_final_target_reached();
+      wait(200);
+      add_target(90_deg);
+      add_target(-115_in, 90_deg);
+      add_target(180_deg);
+      wait_until_final_target_reached();
+      add_target(20_in, 180_deg);
+      wait_until_final_target_reached(2000);
+      move_settings.mid_output = 20;
+      add_target(10_in, 180_deg);
+      wait_until_final_target_reached(1200);
+      add_target(-4_in, 180_deg);
+      add_target(270_deg);
+      wait_until_final_target_reached();
+      lift::tilter.retract();
+      wait(500);
+      move_settings.mid_output = 40;
+      add_target(-14_in, 270_deg);
+      wait_until_final_target_reached(3000);
+      wait(100);
+      lift::tilter.extend();
+      wait_until_final_target_reached(3000);
+      move_settings.start_output = 20;
+      move_settings.end_output = 20;
+      move_settings.mid_output = 20;
+      wait(500);
+      add_target(14_in, 270_deg);
+      ring_motor.move_velocity(400);
+      wait(500);
+      ring_motor.move_velocity(600);
+      wait_until_final_target_reached(2000);
+      add_target(-4_in, 270_deg);
+      wait_until_final_target_reached();
+
+      lift::tilter.retract();
+
+      wait_until_final_target_reached();
+    },
+    auton_clean_up,
+    {&auton_group});
+
+Macro win_point_3(
+    [](){
+      auton_init({0_in, 0_in, 0_deg});
+      lift::auto_grip_enabled = false;
+
+
+      move_settings.start_output = 20;
+      move_settings.mid_output = 100;
+      move_settings.end_output = 20;
+
+      add_target(6_in, 0_deg);
+      wait(100);
+      lift::claw.retract();
+      // add_target(6_in, 0_deg);
+      // wait_until_final_target_reached();
+      // wait(100);
+      // wait(100);
+      // add_target(-6_in, 0_deg);
+      // wait(200);
+      lift_motor.move_absolute(20, 100);
       wait_until_final_target_reached();
       // wait(200);
       lift::claw.extend();
